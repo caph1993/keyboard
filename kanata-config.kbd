@@ -117,6 +117,16 @@
   (  d) (t! type d)
   (s d) tab
 )
+(defchords chord-kl-tab $chord-timeout
+  (k  ) (t! type k)
+  (  l) (t! type l)
+  (k l) ret
+)
+(defchords chord-90-bspc $chord-timeout
+  (9  ) (t! type 9)
+  (  0) (t! type 0)
+  (9 0) (fork bspc (macro S-9 S-0) (sft))
+)
 
 (deflayermap (base)
   ;; define home row mods
@@ -126,22 +136,25 @@
   i (t! home-row-mod i rctl)
   w (t! home-row-mod w lalt)
   o (t! home-row-mod o lalt)
+  a (t! home-row-mod a ralt)
+  q (t! home-row-mod q lmet)
   ;; tab (t! home-row-mod- $tot 450 tab lmet)
   ;; [ (t! home-row-mod- $tot 450 [ rmet)
   ;; tab (t! home-row-mod tab (multi (layer-while-held holdTab) @arrows))
   [ (t! home-row-mod [ @arrows)
+  ] (t! home-row-mod ] (layer-while-held mouse))
   ;; define each letter
-  q (t! type q)
   s (chord chord-sd-tab s)
   d (chord chord-sd-tab d)
   r (t! type r)
   t (t! type t)
   y (t! type y)
   u (t! type u)
-  k (t! type k)
-  l (t! type l)
+  k (chord chord-kl-tab k)
+  l (chord chord-kl-tab l)
+  9 (chord chord-90-bspc 9)
+  0 (chord chord-90-bspc 0)
   p (t! type p)
-  a (t! type a)
   ;; a (t! type a) s (t! type s) d (t! type d) f (t! type f) 
   g (t! type g) h (t! type h)
   ;;  j (t! type j) k (t! typek) l (t! type l)
@@ -150,23 +163,33 @@
   ; (t! type ;)
   left @← up @↑ down @↓ right @→
   caps (tap-hold 200 200 caps (multi nop1 @arrows))
-  tab (tap-hold 200 200 tab XX)
+  ;; tab (tap-hold 200 200 tab XX)
+  tab (t! home-row-mod tab XX)
   spc (t! home-row-mod spc (layer-while-held arrows))
 )
 (defalias arrows (multi (layer-while-held arrows)  (on-release release-vkey 🖰🖰)))
 (deflayer arrows
   _   _   _    _   _    _   _    _   _     _  _    _    lrld      _   @del
-  _     _     _     _    _    _     _    _     _     _    _     _  _  @bspc
-  _       =    @'*  @[*  ]    _    XX @bspc @↑   @→   @C→  _   XX    @\sldr
-  _         -    /    \     @[[ @]] @C← @←    @↓   @del  XX XX            _ 
-  _          _    _    _     _   XX   @btn1 @btn2 XX   XX     _            _
+  _     _     _     _    _    _     _    _    _    @←←  @→→    _   _  @bspc
+  _       =    @'*  @[*   ]    _   C-y @bspc @↑   @→   @C→  _   XX    @*TeX
+  _         -    /    \    @⊂  @⊃ @C← @←    @↓   @del  XX XX            _ 
+  _          C-z  C-x  C-c  C-v  XX  ret esc   @*TeX @*IPA   _            _
   _            _    _          _                    @<=>  _    _   _   _   _
 )
+(deflayermap mouse
+  j @🖱←   i @🖱↑  k @🖱↓   o @🖱→
+  p @☸↑  l @☸↓  9 @☸←  0 @☸→
+  n 🖰1    m 🖰2
+  f12 lrld
+  x C-x   z C-z  c C-c    v C-v    y C-y
+  u XX
+)
+
 (defalias
-  [[ (t! home-row-mod S-9 lsft)
+  ⊂ (t! home-row-mod S-9 lsft)
+  ⊃ S-0
   [* (t! home-row-mod [ lctl)
   '* (t! home-row-mod ' lalt)
-  ]] S-0 
 )
 
 ;; 
@@ -189,7 +212,7 @@
   a C-a  s C-s  d C-d         g C-g
   z C-z  x C-x  c C-c  v C-v  b C-b
   f12 lrld
-  \ @\sldr
+  \ @*TeX
 )
 
 ;; Reference layers for copy-paste
@@ -328,8 +351,11 @@
 (defalias ↑    (fork (fork (fork up      C-up     (nop3)) pgup   (nop0)) (fork   @🖱↑   @☸↑   (nop0))   (nop1)))
 (defalias ↓    (fork (fork (fork down    C-down   (nop3)) pgdn   (nop0)) (fork   @🖱↓   @☸↓   (nop0))   (nop1)))
 (defalias →    (fork (fork (fork right   C-right  (nop3)) end    (nop0)) (fork   @🖱→   @☸→   (nop0))   (nop1)))
-(defalias C←   (fork (fork C-left (unmod (lctl rctl) home) (lctl rctl ctl nop0)) XX (nop1)))
-(defalias C→   (fork (fork C-right (unmod (lctl rctl) end) (lctl rctl ctl nop0)) XX (nop1)))
+(defalias C←   (tap-dance-eager 200 (C-left (tap-hold 200 200 C-left (macro home)))))
+(defalias C→   (tap-dance-eager 200 (C-right (tap-hold 200 200 C-right (macro end)))))
+(defalias ←←   (fork home @☸↓ (nop1)))
+(defalias →→   (fork end @☸↑ (nop1)))
+
 (defalias btn1 (fork ret 🖰1   (nop1)))
 (defalias btn2 (fork esc 🖰2   (nop1)))
 (defalias btn3 (fork esc 🖰3   (nop1)))
@@ -342,8 +368,8 @@
 ;; Either there is a bug of a hardware issue when pressing multiple keys (holding three and pressing the fourh): (` = ralt o) works and (` = ralt j) works, but (` = ralt i) and (` = ralt j) don't. The software doesn't detect it at all.
 
 
-(defalias \sldr (multi (macro (unicode /) 150 bspc sldr 5 \)))
-
+(defalias *TeX (multi (macro (unicode *) 150 bspc sldr 5 \)))
+(defalias *IPA (multi (macro (unicode *) 150 bspc sldr 5 S-`)))
 
 (deftemplate def-seq (vk-name input-keys output-action)
   (defvirtualkeys $vk-name $output-action)
@@ -575,3 +601,74 @@
 (t! def-seq 2/            (\ 2 /                       spc) (macro 🔣² 🔣⁄))
 (t! def-seq _123          (\ S-- 1 2 3                 spc) (macro 🔣₁ 🔣₂ 🔣₃ 🔣₄ 🔣₅ 🔣₆ 🔣₇ 🔣₈ 🔣₉ 🔣₀))
 (t! def-seq ^123          (\ S-6 1 2 3                 spc) (macro 🔣¹ 🔣² 🔣³ 🔣⁴ 🔣⁵ 🔣⁶ 🔣⁷ 🔣⁸ 🔣⁹ 🔣⁰))
+
+(t! def-seq ~:            (S-` S-;                     spc) (unicode ː))
+(t! def-seq ~'            (S-` '                       spc) (unicode ˈ))
+(t! def-seq ~''           (S-` S-'                     spc) (unicode ˈ))
+(t! def-seq ~A            (S-` a                       spc) (unicode ʌ))
+(t! def-seq ~ae           (S-` a e                     spc) (unicode æ))
+(t! def-seq ~aw           (S-` a w                     spc) (unicode ɑ))
+(t! def-seq ~B            (S-` b                       spc) (unicode β))
+(t! def-seq ~bh           (S-` b h                     spc) (unicode β))
+(t! def-seq ~c            (S-` c                       spc) (unicode ç)) ;; ich
+(t! def-seq ~D            (S-` d                       spc) (unicode ð))
+(t! def-seq ~dh           (S-` d h                     spc) (unicode ð))
+(t! def-seq ~dz           (S-` d z                     spc) (unicode ʣ))
+(t! def-seq ~dzh          (S-` d z h                   spc) (unicode ʤ))
+
+;; =========================
+;; e-types and rhotic vowels:
+;;   e  --> er (GA), ehr(RP): about, sofa, taken, fr:je --> teacher, doctor, butter
+;;   è  --> èr (GA), èhr(RP): bed, ten, said, fr:crème --> hair, square, care, bear
+;;      --> Er (GA), Ehr(RP): --> her, bird, word, nurse, serve, learn (stressed)
+;;   ee --> ir (GA), ihr(RP): bee --> near, serious, here
+;; =========================
+(t! def-seq ~e            (S-` e                       spc) (unicode ə))   ;; about, sofa, taken, fr:je
+(t! def-seq ~er           (S-` e r                     spc) (unicode ɚ))   ;; GA teacher, butter, doctor (unstressed)
+(t! def-seq ~ehr          (S-` e h r                   spc) (macro 🔣ə (unicode "(") 🔣ɹ (unicode ")")))   ;; RP of er
+(t! def-seq ~è            (S-` RA-e                    spc) (unicode ɛ))   ;; bed, ten, said, fr:crème
+(t! def-seq ~èr           (S-` RA-e r                  spc) (macro 🔣ɛ 🔣ɹ))   ;; GA hair, square, care, bear (AmE)
+(t! def-seq ~èhr          (S-` RA-e h r                spc) (macro 🔣ɛ 🔣ə))   ;; RP of èr
+(t! def-seq ~Er           (S-` S-e r                   spc) (unicode ɝ))   ;; GA bird, word, girl, nurse, serve, learn (stressed)
+(t! def-seq ~Ehr          (S-` S-e h r                 spc) (macro 🔣ɜ 🔣ː))  ;; RP of Er
+(t! def-seq ~ee           (S-` e e                     spc) (macro 🔣i 🔣ː))  ;; see, fleece, machine
+(t! def-seq ~ir           (S-` i r                     spc) (macro 🔣ɪ 🔣ɹ))   ;; GA near, serious, here (AmE)
+(t! def-seq ~ihr          (S-` i h r                   spc) (macro 🔣ɪ 🔣ə))   ;; RP of ihr
+
+(t! def-seq ~g            (S-` g                       spc) (unicode ɣ))
+(t! def-seq ~gh           (S-` g h                     spc) (unicode ɣ))
+(t! def-seq ~h            (S-` h                       spc) (unicode ʰ))
+(t! def-seq ~i            (S-` i                       spc) (unicode ɪ))
+(t! def-seq ~j            (S-` j                       spc) (unicode ʒ)) ;; je, vision
+(t! def-seq ~k            (S-` k                       spc) (unicode ʞ))
+(t! def-seq ~l            (S-` l                       spc) (unicode ʎ))
+(t! def-seq ~lh           (S-` l h                     spc) (unicode ʎ))
+(t! def-seq ~l-           (S-` l -                     spc) (unicode ɫ))
+(t! def-seq ~m            (S-` m                       spc) (unicode ɱ))
+(t! def-seq ~gn           (S-` g n                     spc) (unicode ɳ)) ;; toño
+(t! def-seq ~ñ            (S-` RA-n                    spc) (unicode ɳ)) ;; toño
+(t! def-seq ~ng           (S-` n g                     spc) (unicode ŋ)) ;; singer, con_un_amigo
+(t! def-seq ~ò            (S-` ` o                     spc) (unicode ɔ))
+(t! def-seq ~ô            (S-` S-6 o                   spc) (unicode ɒ))
+;; (t! def-seq ~ö            (S-` S-6 o                   spc) (unicode ø))
+(t! def-seq ~oe           (S-` o e                     spc) (unicode œ))
+(t! def-seq ~ph           (S-` p h                     spc) (unicode ɸ))
+;; (t! def-seq ~R            (S-` r                       spc) (unicode ɾ ɹ ʁ ʀ))
+(t! def-seq ~r            (S-` r                       spc) (unicode ɾ))
+(t! def-seq ~R            (S-` S-r                     spc) (unicode ʁ))
+(t! def-seq ~rh           (S-` r h                     spc) (unicode ɹ))
+(t! def-seq ~S            (S-` s                       spc) (unicode ʃ))
+(t! def-seq ~sh           (S-` s h                     spc) (unicode ʃ))
+(t! def-seq ~T            (S-` t                       spc) (unicode θ))
+(t! def-seq ~th           (S-` t h                     spc) (unicode θ))
+(t! def-seq ~ts           (S-` t s                     spc) (unicode ʦ))
+(t! def-seq ~ch           (S-` c h                     spc) (unicode ʧ))
+(t! def-seq ~tsh          (S-` t s h                   spc) (unicode ʧ))
+(t! def-seq ~u            (S-` u                       spc) (unicode ʊ))
+(t! def-seq ~V            (S-` v                       spc) (unicode ʋ))
+(t! def-seq ~W            (S-` w                       spc) (unicode ʷ))
+(t! def-seq ~X            (S-` x                       spc) (unicode χ))
+(t! def-seq ~xh           (S-` x h                     spc) (unicode ɕ))
+(t! def-seq ~y            (S-` y                       spc) (unicode ʏ))
+(t! def-seq ~Z            (S-` z                       spc) (unicode ʒ))
+(t! def-seq ~zh           (S-` z h                     spc) (unicode ʒ))
