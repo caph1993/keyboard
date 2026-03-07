@@ -117,7 +117,7 @@
   (  d) (t! type d)
   (s d) tab
 )
-(defchords chord-kl-tab $chord-timeout
+(defchords chord-kl-ret $chord-timeout
   (k  ) (t! type k)
   (  l) (t! type l)
   (k l) ret
@@ -126,6 +126,11 @@
   (9  ) (t! type 9)
   (  0) (t! type 0)
   (9 0) (fork bspc (macro S-9 S-0) (sft))
+)
+(defchords chord-23-esc $chord-timeout
+  (2  ) (t! type 2)
+  (  3) (t! type 3)
+  (2 3) esc
 )
 
 (deflayermap (base)
@@ -150,10 +155,12 @@
   t (t! type t)
   y (t! type y)
   u (t! type u)
-  k (chord chord-kl-tab k)
-  l (chord chord-kl-tab l)
+  k (chord chord-kl-ret k)
+  l (chord chord-kl-ret l)
   9 (chord chord-90-bspc 9)
   0 (chord chord-90-bspc 0)
+  2 (chord chord-23-esc 2)
+  3 (chord chord-23-esc 3)
   p (t! type p)
   ;; a (t! type a) s (t! type s) d (t! type d) f (t! type f) 
   g (t! type g) h (t! type h)
@@ -183,6 +190,13 @@
   f12 lrld
   x C-x   z C-z  c C-c    v C-v    y C-y
   u XX
+)
+
+(deflayermap unused-numbers
+  q 1  w 2  e 3  f 4  g 5
+  h 6  j 7  i 8  o 9  p 0
+  m '  k [  l ]  ; \
+  a \  s `  d -  v =
 )
 
 (defalias
