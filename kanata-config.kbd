@@ -130,7 +130,7 @@
 (defchords chord-23-esc $chord-timeout
   (2  ) (t! type 2)
   (  3) (t! type 3)
-  (2 3) esc
+  (2 3) @esc
 )
 
 (deflayermap (base)
@@ -173,10 +173,24 @@
   ;; tab (tap-hold 200 200 tab XX)
   tab (t! home-row-mod tab XX)
   spc (t! home-row-mod spc (layer-while-held arrows))
+  esc @esc
 )
+
+(defalias esc  (multi esc (on-press tap-vkey L0) )) ;; tap esc to exit custom layouts
+
+(defalias L1 (on-press press-vkey L1))
+(defvirtualkeys L1 (layer-while-held layout-IPA))
+;; (defvirtualkeys L2 (layer-while-held layout-greek))
+;; (defvirtualkeys L3 (layer-while-held layout-emoji))
+;; (defvirtualkeys L4 (layer-while-held layout-mathcal))
+;; (defvirtualkeys L5 (layer-while-held layout-mathbb))
+;; (defvirtualkeys L6 (layer-while-held layout-superscript))
+;; (defvirtualkeys L7 (layer-while-held layout-subscript))
+;; (defvirtualkeys L8 (layer-while-held layout-keyboard))
+
 (defalias arrows (multi (layer-while-held arrows)  (on-release release-vkey 🖰🖰)))
 (deflayer arrows
-  _   _   _    _   _    _   _    _   _     _  _    _    lrld      _   @del
+  _   @L1   _    _   _    _   _    _   _     _  _    _    lrld      _   @del
   _     _     _     _    _    _     _    _    _    @←←  @→→    _   _  @bspc
   _       =    @'*  @[*   ]    _   C-y @bspc @↑   @→   @C→  _   XX    @*TeX
   _         -    /    \    @⊂  @⊃ @C← @←    @↓   @del  XX XX            _ 
@@ -662,8 +676,8 @@
 (t! def-seq ~gn           (S-` g n                     spc) (unicode ɳ)) ;; toño
 (t! def-seq ~ñ            (S-` RA-n                    spc) (unicode ɳ)) ;; toño
 (t! def-seq ~ng           (S-` n g                     spc) (unicode ŋ)) ;; singer, con_un_amigo
-(t! def-seq ~ò            (S-` ` o                     spc) (unicode ɔ))
-(t! def-seq ~ô            (S-` S-6 o                   spc) (unicode ɒ))
+(t! def-seq ~ò            (S-` ` o                     spc) (unicode ɔ)) ;; crawl
+(t! def-seq ~ô            (S-` S-6 o                   spc) (unicode ɒ)) ;; palm
 ;; (t! def-seq ~ö            (S-` S-6 o                   spc) (unicode ø))
 (t! def-seq ~oe           (S-` o e                     spc) (unicode œ))
 (t! def-seq ~ph           (S-` p h                     spc) (unicode ɸ))
@@ -686,3 +700,82 @@
 (t! def-seq ~y            (S-` y                       spc) (unicode ʏ))
 (t! def-seq ~Z            (S-` z                       spc) (unicode ʒ))
 (t! def-seq ~zh           (S-` z h                     spc) (unicode ʒ))
+
+
+
+;; https://help.keyman.com/keyboard/kreative_superipa/1.1/kreative_superipa
+;; https://dohliam.github.io/xsampa/
+;; https://open-dict-data.github.io/ipa-lookup/en/?#
+;; https://bennw.github.io/werdel/#infinite
+(defvirtualkeys L0 (multi
+  (on-press release-vkey L1)
+  ;; (on-press release-vkey L2)
+  ;; (on-press release-vkey L3)
+  ;; (on-press release-vkey L4)
+  ;; (on-press release-vkey L5)
+  ;; (on-press release-vkey L6)
+  ;; (on-press release-vkey L7)
+  ;; (on-press release-vkey L8)
+))
+
+(deftemplate ipa4 (normal shift- alt- alt-shift-)
+  (switch 
+    ((and nop4 nop5)) $alt-shift- break
+    ((and nop5))      $alt- break
+    ((and nop4))      $shift- break
+    ()                $normal break
+  )
+)
+(deflayermap layout-IPA
+  lsft nop4
+  rsft nop4
+  ralt nop5
+  a (t! ipa4 a   🔣ɑ  🔣ʰ  🔣◌̺)
+  b (t! ipa4 b   🔣β  🔣ɓ  🔣ʙ)
+  c (t! ipa4 c   🔣ç  🔣◌̜  🔣◌̹)
+  d (t! ipa4 d   🔣ð  🔣ɖ  🔣◌̪)
+  e (t! ipa4 e   🔣ɛ  🔣ɚ  🔣ɝ)
+  f (t! ipa4 f   🔣ɱ  🔣ɗ  🔣ʄ)
+  g (t! ipa4 g   🔣ɣ  XX   🔣ɢ)
+  h (t! ipa4 h   🔣ɥ  🔣ɦ  🔣ʜ)
+  i (t! ipa4 i   🔣ɪ  XX   🔣ɪ̈)
+  j (t! ipa4 j   🔣ɲ  🔣ʝ  🔣ɟ)
+  k (t! ipa4 k   🔣ɬ  🔣ɭ  🔣ɮ)
+  l (t! ipa4 l   🔣ʎ  🔣ɺ  🔣ʟ)
+  m (t! ipa4 m   🔣ɯ  🔣ⁿ  🔣ɰ)
+  n (t! ipa4 n   🔣ŋ  🔣ɳ  🔣ɴ)
+  o (t! ipa4 o   🔣ɔ  🔣ˡ  🔣ʘ)
+  p (t! ipa4 p   🔣ʋ  🔣ɸ  🔣↘)
+  q (t! ipa4 q   🔣ɒ  🔣ˠ  🔣◌̻)
+  r (t! ipa4 r   🔣ʁ  🔣ɹ  🔣ʀ)
+  s (t! ipa4 s   🔣ʃ  🔣ɕ  🔣ʂ)
+  t (t! ipa4 t   🔣θ  🔣ʈ  🔣↗)
+  u (t! ipa4 u   🔣ʊ  XX   🔣ʊ̈)
+  v (t! ipa4 v   🔣ʌ  XX  XX)
+  w (t! ipa4 w   🔣ʍ  🔣ʷ  🔣◌̼)
+  x (t! ipa4 x   🔣χ  🔣ɧ  🔣ħ)
+  y (t! ipa4 y   🔣ʏ  🔣ɠ  🔣ʛ)
+  z (t! ipa4 z   🔣ʒ  🔣ʑ  🔣ʐ)
+  - (t! ipa4 XX  XX   🔣‿  🔣◌̠)
+  , (t! ipa4 ,   🔣<  🔣⟨  🔣ʢ)
+  ; (t! ipa4 XX  🔣ː  🔣◌̆  🔣ˑ)
+  . (t! ipa4 .   XX   XX  🔣ʡ)
+  ' (t! ipa4 XX  XX   🔣ʼ  🔣◌̈)
+  [ (t! ipa4 XX  XX   🔣◌̝  🔣◌̘)
+  ] (t! ipa4 XX  XX   🔣◌̞  🔣◌̙)
+  / (t! ipa4 XX   🔣ʔ 🔣ˤ  🔣ʕ)
+  \ (t! ipa4 🔣|  🔣‖ 🔣ǀ  🔣ǁ)
+  ` (t! ipa4 🔣˞  🔣◌̃ 🔣◌̤  🔣◌̰)
+  = (t! ipa4 🔣◌̩  🔣◌̯ 🔣ǂ  🔣◌̟)
+  0 (t! ipa4 🔣◌̥  XX  🔣◌̬ XX)
+  1 (t! ipa4 XX   🔣ꜜ 🔣ǃ XX)
+  2 (t! ipa4 🔣ø  🔣ə 🔣◌̽  🔣ɘ)
+  3 (t! ipa4 🔣ɜ  🔣◌́ 🔣ɞ  🔣◌̋)
+  4 (t! ipa4 🔣ɾ  🔣◌̄ 🔣ɽ  🔣ɻ)
+  5 (t! ipa4 🔣ɫ  🔣◌̀ 🔣◌̴  🔣◌̏)
+  6 (t! ipa4 🔣ɐ  🔣ꜛ 🔣◌̂  🔣◌̌)
+  7 (t! ipa4 🔣ɤ  🔣æ 🔣◌᷈  🔣ɶ)
+  8 (t! ipa4 🔣ɵ  XX  🔣◌᷅  🔣◌᷄)
+  9 (t! ipa4 🔣œ  XX  🔣◌̚ XX)
+)
+;; https://keymap-drawer.streamlit.app/
