@@ -146,8 +146,8 @@
   ;; tab (t! home-row-mod- $tot 450 tab lmet)
   ;; [ (t! home-row-mod- $tot 450 [ rmet)
   ;; tab (t! home-row-mod tab (multi (layer-while-held holdTab) @arrows))
-  [ (t! home-row-mod [ @arrows)
-  ] (t! home-row-mod ] (layer-while-held mouse))
+  [ (t! home-row-mod [ @arrows-mouse)
+  ] (t! home-row-mod ] @mouse-arrows)
   ;; define each letter
   s (chord chord-sd-tab s)
   d (chord chord-sd-tab d)
@@ -169,14 +169,16 @@
   n (t! type n) m (t! type m)
   ; (t! type ;)
   left @← up @↑ down @↓ right @→
-  caps (tap-hold 200 200 caps (multi nop1 @arrows))
+  caps (tap-hold 200 200 caps @mouse-arrows)
   ;; tab (tap-hold 200 200 tab XX)
-  tab (t! home-row-mod tab XX)
-  spc (t! home-row-mod spc (layer-while-held arrows))
+  tab (t! home-row-mod tab @arrows-mouse)
+  spc (t! home-row-mod spc @arrows-mouse)
   esc @esc
 )
 
 (defalias esc  (multi esc (on-press tap-vkey L0) )) ;; tap esc to exit custom layouts
+(defalias arrows-mouse (fork (layer-while-held arrows) (layer-while-held mouse) (ralt nop1)))
+(defalias mouse-arrows (fork (layer-while-held mouse) (layer-while-held arrows) (ralt)))
 
 (defalias L1 (on-press press-vkey L1))
 (defvirtualkeys L1 (layer-while-held layout-IPA))
@@ -188,15 +190,23 @@
 ;; (defvirtualkeys L7 (layer-while-held layout-subscript))
 ;; (defvirtualkeys L8 (layer-while-held layout-keyboard))
 
-(defalias arrows (multi (layer-while-held arrows)  (on-release release-vkey 🖰🖰)))
+(defalias arrows (multi (layer-while-held arrows) ))
 (deflayer arrows
   _   @L1   _    _   _    _   _    _   _     _  _    _    lrld      _   @del
-  _     _     _     _    _    _     _    _    _    @←←  @→→    _   _  @bspc
+  _     _     _     _    _    _     _    _   _   @←←  @→→    _   _  @bspc
   _       =    @'*  @[*   ]    _   C-y @bspc @↑   @→   @C→  _   XX    @*TeX
   _         -    /    \    @⊂  @⊃ @C← @←    @↓   @del  XX XX            _ 
-  _          C-z  C-x  C-c  C-v  XX  ret esc   @*TeX @*IPA   _            _
+  _          C-z  C-x  C-c  C-v XX @btn1 @btn2 @*IPA _   _            _
   _            _    _          _                    @<=>  _    _   _   _   _
 )
+(defchords chord-90-click $chord-timeout
+  (9  ) @☸↓
+  (  0) @☸↑
+  (9 0) 🖰1
+)
+(defalias X↓ (chord chord-90-click 9))
+(defalias X↑ (chord chord-90-click 0))
+
 (deflayermap mouse
   j @🖱←   i @🖱↑  k @🖱↓   o @🖱→
   p @☸↑  l @☸↓  9 @☸←  0 @☸→
@@ -204,6 +214,8 @@
   f12 lrld
   x C-x   z C-z  c C-c    v C-v    y C-y
   u XX
+  ralt @<=>
+  spc nop2
 )
 
 (deflayermap unused-numbers
@@ -235,13 +247,6 @@
 ;;   c
 ;; )))
 
-(deflayermap (holdTab)
-  q C-q                r C-r  t C-t y C-y
-  a C-a  s C-s  d C-d         g C-g
-  z C-z  x C-x  c C-c  v C-v  b C-b
-  f12 lrld
-  \ @*TeX
-)
 
 ;; Reference layers for copy-paste
 (deflayer empty
@@ -264,43 +269,26 @@
 
 
 ;; ----------------------------------------------------------
-;; Custom layouts and sldr commands (mostly TeX)
-;; ----------------------------------------------------------
-
-;; Dummy layer to show sldr icon in kanata-tray
-(deflayermap (sldr-empty-layer))
-(defvirtualkeys sldr-tray-on (layer-while-held sldr-empty-layer))
-(defvirtualkeys sldr-tray-off (on-press release-vkey sldr-tray-on))
-(defalias sldr-tray (multi
-  (on-press press-vkey sldr-tray-on)
-  (on-idle 1 tap-vkey sldr-tray-off)
-))
-
-;; (defalias IPA (on-press press-vkey vkey-layouts))
-;; (defalias esc-IPA (on-press release-vkey vkey-layouts))
-;; (defvirtualkeys vkey-layouts (layer-while-held layout-IPA))
-
-;; ----------------------------------------------------------
 ;; Mouse layer
 ;; ----------------------------------------------------------
 
-(deftemplate  def-accel (key-name actual-key delay-1 delay-2 delay-3 delay-4 delay-*)
-  (defvirtualkeys $key-name (macro⟳↑⤫ ($actual-key 1 $delay-*) 25))
+(deftemplate  def-accel (key-name the-key delay-1 delay-2 delay-3 delay-4 delay-*)
+  (defvirtualkeys $key-name (macro⟳↑⤫ ($the-key 1 $delay-*) 25))
   (defalias $key-name
     (multi
       (macro-release-cancel
-        ($actual-key 1 $delay-1) 25 ($actual-key 1 $delay-1) 25 ($actual-key 1 $delay-1) 25
-        ($actual-key 1 $delay-1) 25 ($actual-key 1 $delay-1) 25 ($actual-key 1 $delay-1) 25
-        ($actual-key 1 $delay-1) 25 ($actual-key 1 $delay-1) 25 ($actual-key 1 $delay-1) 25
-        ($actual-key 1 $delay-2) 25 ($actual-key 1 $delay-2) 25 ($actual-key 1 $delay-2) 25
-        ($actual-key 1 $delay-2) 25 ($actual-key 1 $delay-2) 25 ($actual-key 1 $delay-2) 25
-        ($actual-key 1 $delay-2) 25 ($actual-key 1 $delay-2) 25 ($actual-key 1 $delay-2) 25
-        ($actual-key 1 $delay-3) 25 ($actual-key 1 $delay-3) 25 ($actual-key 1 $delay-3) 25
-        ($actual-key 1 $delay-3) 25 ($actual-key 1 $delay-3) 25 ($actual-key 1 $delay-3) 25
-        ($actual-key 1 $delay-3) 25 ($actual-key 1 $delay-3) 25 ($actual-key 1 $delay-3) 25
-        ($actual-key 1 $delay-4) 25 ($actual-key 1 $delay-4) 25 ($actual-key 1 $delay-4) 25
-        ($actual-key 1 $delay-4) 25 ($actual-key 1 $delay-4) 25 ($actual-key 1 $delay-4) 25
-        ($actual-key 1 $delay-4) 25 ($actual-key 1 $delay-4) 25 ($actual-key 1 $delay-4) 25
+        ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25
+        ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25
+        ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25
+        ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25
+        ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25
+        ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25
+        ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25
+        ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25
+        ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25
+        ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25
+        ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25
+        ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25
         (on-press press-vkey $key-name) ;; this repeats delay-* forever
       )
       (on-release release-vkey  $key-name)
@@ -312,20 +300,6 @@
 ;; (t! def-accel  🖱→n   🖱→   50 150 400 1500 2500)
 ;; (t! def-accel  🖱←n   🖱←   50 150 400 1500 2500)
 ;; (t! def-accel  🖱↓n   🖱↓   50 150 400 1500 2500)
-(defalias
-  🖱↑n  (🖱accel↑ 5 300 1 10)
-  🖱→n  (🖱accel→ 5 300 1 10)
-  🖱←n  (🖱accel← 5 300 1 10)
-  🖱↓n  (🖱accel↓ 5 300 1 10)
-  🖱↑s  (🖱accel↑ 25 300 1 10)
-  🖱→s  (🖱accel→ 25 300 1 10)
-  🖱←s  (🖱accel← 25 300 1 10)
-  🖱↓s  (🖱accel↓ 25 300 1 10)
-  🖱↑ (fork @🖱↑n @🖱↑s (nop2))
-  🖱→ (fork @🖱→n @🖱→s (nop2))
-  🖱← (fork @🖱←n @🖱←s (nop2))
-  🖱↓ (fork @🖱↓n @🖱↓s (nop2))
-)
 ;; Scrollwheel movements (normal and slow)
 (t! def-accel  ☸↑n   🖱☸↑   5 15 40 150 250)
 (t! def-accel  ☸→n   🖱☸→   5 15 40 150 250)
@@ -342,13 +316,27 @@
   ☸← (fork @☸←n @☸←s (nop2))
   ☸↓ (fork @☸↓n @☸↓s (nop2))
 )
+(defalias
+  🖱↑n  (🖱accel↑ 5 300 1 10)
+  🖱→n  (🖱accel→ 5 300 1 10)
+  🖱←n  (🖱accel← 5 300 1 10)
+  🖱↓n  (🖱accel↓ 5 300 1 10)
+  🖱↑s  (🖱accel↑ 25 300 1 10)
+  🖱→s  (🖱accel→ 25 300 1 10)
+  🖱←s  (🖱accel← 25 300 1 10)
+  🖱↓s  (🖱accel↓ 25 300 1 10)
+  🖱↑ (fork (fork @🖱↑n @☸↑ (nop1)) @🖱↑s (nop2))
+  🖱→ (fork (fork @🖱→n @☸→ (nop1)) @🖱→s (nop2))
+  🖱← (fork (fork @🖱←n @☸← (nop1)) @🖱←s (nop2))
+  🖱↓ (fork (fork @🖱↓n @☸↓ (nop1)) @🖱↓s (nop2))
+)
 
 ;; ----------------------------------------------------------
 ;; Tab and arrows layer
 ;; ----------------------------------------------------------
 
 
-(defalias num-mods (multi (layer-while-held num-mods) (on-release release-vkey 🖰🖰)))
+(defalias num-mods (layer-while-held num-mods))
 (deflayermap (num-mods)
   ;; 2 lsft   3 lctl  4 @<=>
   9 (multi sft (unmod (ctl) 9))
@@ -364,40 +352,45 @@
   f12 lrld
 )
 
-(defalias 🖰🖰   (multi nop1 (on-press press-vkey 🖰🖰)))
-(defvirtualkeys 🖰🖰 nop1)
-
-
-(defalias <=>  (multi nop0))
+(defalias <=>  nop1)
 (defvirtualkeys valt lalt)
 (defvirtualkeys vctl lctl)
 
 ;; nop0 is the "go to extreme" button <=>l
 ;; nop3 is a "ctl" button. All ctl buttons trigger nop3, except the tab key for which certain keys are unmoded.
 ;; Repeated arrow means ctrl+arrow (word jump). Only defined for left and right.
-(defalias ←    (fork (fork (fork left    C-left   (nop3)) home   (nop0)) (fork   @🖱←   @☸←   (nop0))   (nop1)))
-(defalias ↑    (fork (fork (fork up      C-up     (nop3)) pgup   (nop0)) (fork   @🖱↑   @☸↑   (nop0))   (nop1)))
-(defalias ↓    (fork (fork (fork down    C-down   (nop3)) pgdn   (nop0)) (fork   @🖱↓   @☸↓   (nop0))   (nop1)))
-(defalias →    (fork (fork (fork right   C-right  (nop3)) end    (nop0)) (fork   @🖱→   @☸→   (nop0))   (nop1)))
-(defalias C←   (tap-dance-eager 200 (C-left (tap-hold 200 200 C-left (macro home)))))
-(defalias C→   (tap-dance-eager 200 (C-right (tap-hold 200 200 C-right (macro end)))))
-(defalias ←←   (fork home @☸↓ (nop1)))
-(defalias →→   (fork end @☸↑ (nop1)))
-
-(defalias btn1 (fork ret 🖰1   (nop1)))
-(defalias btn2 (fork esc 🖰2   (nop1)))
-(defalias btn3 (fork esc 🖰3   (nop1)))
-(defalias bspc (fork bspc (macro S-home (unmod bspc)) (nop0)))
-(defalias del  (fork del  (macro S-end  (unmod del )) (nop0)))
-(defalias Cbspc (fork (fork C-bspc (macro S-home (unmod bspc)) (nop0)) XX (nop1)))
-(defalias Cdel  (fork (fork C-del  (macro S-home (unmod del )) (nop0)) XX (nop1)))
-(defalias spc-sft    (tap-hold-press 200 200 spc lsft))
-
-;; Either there is a bug of a hardware issue when pressing multiple keys (holding three and pressing the fourh): (` = ralt o) works and (` = ralt j) works, but (` = ralt i) and (` = ralt j) don't. The software doesn't detect it at all.
-
+(defalias ←    left)
+(defalias ↑    (fork up   @X↑  (nop1)))
+(defalias ↓    (fork down @X↓  (nop1)))
+(defalias →    right)
+(defalias C←   (tap-hold 200 300 C-left (macro home)))
+(defalias C→   (tap-hold 200 300 C-right (macro end)))
+(defalias ←←   (fork home pgup (nop1)))
+(defalias →→   (fork end  pgdn (nop1)))
 
 (defalias *TeX (multi (macro (unicode *) 150 bspc sldr 5 \)))
 (defalias *IPA (multi (macro (unicode *) 150 bspc sldr 5 S-`)))
+
+(defalias btn1 (fork ret   🖰1   (nop1)))
+(defalias btn2 (fork @*TeX 🖰2   (nop1)))
+(defalias btn3 (fork esc   🖰3   (nop1)))
+(defalias bspc (tap-hold 200 600 bspc (macro S-home (unmod bspc))))
+(defalias del  (tap-hold 200 600 del  (macro S-end  (unmod del ))))
+
+;; Either there is a bug of a hardware issue when pressing multiple keys (holding three and pressing the fourh): (` = ralt o) works and (` = ralt j) works, but (` = ralt i) and (` = ralt j) don't. The software doesn't detect it at all.
+
+;; ----------------------------------------------------------
+;; Custom layouts and sldr commands (mostly TeX)
+;; ----------------------------------------------------------
+
+;; Dummy layer to show sldr icon in kanata-tray
+(deflayermap (sldr-empty-layer))
+(defvirtualkeys sldr-tray-on (layer-while-held sldr-empty-layer))
+(defvirtualkeys sldr-tray-off (on-press release-vkey sldr-tray-on))
+(defalias sldr-tray (multi
+  (on-press press-vkey sldr-tray-on)
+  (on-idle 1 tap-vkey sldr-tray-off)
+))
 
 (deftemplate def-seq (vk-name input-keys output-action)
   (defvirtualkeys $vk-name $output-action)
@@ -460,7 +453,9 @@
 (t! def-seq \approx       (\ a p p r o x               spc) (unicode ≈))
 (t! def-seq \neq          (\ n e q                     spc) (unicode ≠))
 (t! def-seq \eqdef        (\ e q d e f                 spc) (unicode ≝))
+(t! def-seq \le           (\ l e                       spc) (unicode ≤))
 (t! def-seq \leq          (\ l e q                     spc) (unicode ≤))
+(t! def-seq \ge           (\ g e                       spc) (unicode ≥))
 (t! def-seq \geq          (\ g e q                     spc) (unicode ≥))
 (t! def-seq \sum          (\ s u m                     spc) (unicode ∑))
 (t! def-seq \int          (\ i n t                     spc) (unicode ∫))
