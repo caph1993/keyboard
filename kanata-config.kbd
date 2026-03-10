@@ -134,46 +134,61 @@
 )
 
 (deflayermap (base)
-  ;; define home row mods
-  f (t! home-row-mod f lsft)
-  j (t! home-row-mod j rsft)
-  e (t! home-row-mod e lctl)
-  i (t! home-row-mod i rctl)
-  w (t! home-row-mod w lalt)
-  o (t! home-row-mod o lalt)
-  a (t! home-row-mod a ralt)
-  q (t! home-row-mod q lmet)
-  ;; tab (t! home-row-mod- $tot 450 tab lmet)
-  ;; [ (t! home-row-mod- $tot 450 [ rmet)
-  ;; tab (t! home-row-mod tab (multi (layer-while-held holdTab) @arrows))
-  [ (t! home-row-mod [ @arrows-mouse)
-  ] (t! home-row-mod ] @mouse-arrows)
-  ;; define each letter
-  s (chord chord-sd-tab s)
-  d (chord chord-sd-tab d)
-  r (t! type r)
-  t (t! type t)
-  y (t! type y)
-  u (t! type u)
-  k (chord chord-kl-ret k)
-  l (chord chord-kl-ret l)
-  9 (chord chord-90-bspc 9)
-  0 (chord chord-90-bspc 0)
-  2 (chord chord-23-esc 2)
-  3 (chord chord-23-esc 3)
-  p (t! type p)
-  ;; a (t! type a) s (t! type s) d (t! type d) f (t! type f) 
-  g (t! type g) h (t! type h)
-  ;;  j (t! type j) k (t! typek) l (t! type l)
-  z (t! type z) x (t! type x) c (t! type c) v (t! type v) b (t! type b) 
-  n (t! type n) m (t! type m)
-  ; (t! type ;)
-  left @← up @↑ down @↓ right @→
-  caps (tap-hold 200 200 caps @mouse-arrows)
-  ;; tab (tap-hold 200 200 tab XX)
-  tab (t! home-row-mod tab @arrows-mouse)
-  spc (t! home-row-mod spc @arrows-mouse)
+  ;; Row of F keys
   esc @esc
+
+  ;; Row of numbers
+  2    (chord chord-23-esc 2)
+  3    (chord chord-23-esc 3)
+  9    (chord chord-90-bspc 9)
+  0    (chord chord-90-bspc 0)
+
+  ;; Row of qwe
+  tab  (t! home-row-mod tab   @arrows-mouse)
+  q    (t! home-row-mod- $tot 350 q    lmet)
+  w    (t! home-row-mod w    lalt)
+  e    (t! home-row-mod e    lctl)
+  r    (t! type r)
+  t    (t! type t)
+  y    (t! type y)
+  u    (t! type u)
+  i    (t! home-row-mod i    rctl)
+  o    (t! home-row-mod o    lalt)
+  p    (t! home-row-mod- $tot 350 p    lmet)
+  [    (t! home-row-mod [     @arrows-mouse)
+  ]    (t! home-row-mod ]     @mouse-arrows)
+
+  ;; Row of asd
+  caps (t! home-row-mod caps @num)
+  a    (t! type a)
+  s    (chord chord-sd-tab s)
+  d    (chord chord-sd-tab d)
+  f    (t! home-row-mod f    lsft)
+  g    (t! type g)
+  h    (t! type h)
+  j    (t! home-row-mod j    rsft)
+  k    (chord chord-kl-ret k)
+  l    (chord chord-kl-ret l)
+  ;    (t! type ;)
+  '    (t! home-row-mod '    @num)
+  
+  ;; Row of z
+  z    (t! type z)
+  x    (t! type x)
+  c    (t! home-row-mod c    ralt)
+  v    (t! type v)
+  b    (t! type b) 
+  n    (t! type n)
+  m    (t! home-row-mod m    ralt)
+  ,    (t! type ,)
+  .    (t! type .)
+  /    (t! type /)
+
+  ;; row of space
+  spc  (t! home-row-mod spc   @arrows-mouse)
+  ralt (fork ralt @num (lalt))
+  lalt (fork lalt @num (ralt nop1))
+  left @← up @↑ down @↓ right @→
 )
 
 (defalias esc  (multi esc (on-press tap-vkey L0) )) ;; tap esc to exit custom layouts
@@ -190,14 +205,14 @@
 ;; (defvirtualkeys L7 (layer-while-held layout-subscript))
 ;; (defvirtualkeys L8 (layer-while-held layout-keyboard))
 
-(defalias arrows (multi (layer-while-held arrows) ))
+(defalias arrows (layer-while-held arrows))
 (deflayer arrows
   _   @L1   _    _   _    _   _    _   _     _  _    _    lrld      _   @del
   _     _     _     _    _    _     _    _   _   @←←  @→→    _   _  @bspc
   _       =    @'*  @[*   ]    _   C-y @bspc @↑   @→   @C→  _   XX    @*TeX
   _         -    /    \    @⊂  @⊃ @C← @←    @↓   @del  XX XX            _ 
   _          C-z  C-x  C-c  C-v XX @btn1 @btn2 @*IPA _   _            _
-  _            _    _          _                    @<=>  _    _   _   _   _
+  _           _ @num          @arrows                    @<=>  _    _   _   _   _
 )
 (defchords chord-90-click $chord-timeout
   (9  ) @☸↓
@@ -218,12 +233,41 @@
   spc nop2
 )
 
-(deflayermap unused-numbers
-  q 1  w 2  e 3  f 4  g 5
-  h 6  j 7  i 8  o 9  p 0
+(defalias num (layer-while-held num))
+(deflayermap num
+  q (t! home-row-mod 1 lmet)
+  w (t! home-row-mod 2 lalt)
+  e (t! home-row-mod 3 lctl)
+  f (t! home-row-mod 4 lsft)
+  g (t! type 5)
+  h (t! type 6)
+  j (t! home-row-mod 7 rsft)
+  i (t! home-row-mod 8 rctl)
+  o (t! home-row-mod 9 lalt)
+  p (t! home-row-mod 0 ralt)
+  tab `
   m '  k [  l ]  ; \
   a \  s `  d -  v =
+  ralt @Fkeys
+  spc @num
 )
+(defalias Fkeys (layer-while-held Fkeys))
+(deflayermap Fkeys
+  q (t! home-row-mod F1 lmet)
+  w (t! home-row-mod F2 lalt)
+  e (t! home-row-mod F3 lctl)
+  f (t! home-row-mod F4 lsft)
+  g (t! type F5)
+  h (t! type F6)
+  j (t! home-row-mod F7 rsft)
+  i (t! home-row-mod F8 rctl)
+  o (t! home-row-mod F9 lalt)
+  p (t! home-row-mod F10 ralt)
+  r (t! type F11)
+  u (t! type F12)
+  ralt @Fkeys
+)
+
 
 (defalias
   ⊂ (t! home-row-mod S-9 lsft)
