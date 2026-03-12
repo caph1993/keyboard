@@ -1,852 +1,278 @@
 (defcfg
-  danger-enable-cmd yes
-  movemouse-inherit-accel-state yes
-  movemouse-smooth-diagonals yes
-  sequence-input-mode visible-backspaced ;; shows the sequence as it is typed
-  ;; sequence-input-mode hidden-delay-type ;; hides while typing. Outputs if invalid
-  sequence-timeout 8000 ;; 8 seconds maximum between key presses in sldr sequence
-)
-
-;; My natural right hand position when typing text is the following:
-;; index finger on the joint (J,N,M)
-;; middle finger on the (I)
-;; anular finger on the (O)
-;; pinky finger on the ([)
-;; thumb finger on the laptop, below (ralt) and unable to reach it comfortably, but with the tip over the (space bar)
-
-;; My natural right hand position when typing text is the following:
-;; index finger on (f)
-;; middle finger on the joint (r,4)
-;; anular finger on the joint (3,e)
-;; pinky finger on the joint (1,tab,q)
-;; thumb finger symmetric to the left, below (lalt) unable to reach it comfortably, but with the tip over the (space bar)
-
-;; jiko
-;; erdf
-;; 
-;; Activate with (q hold then w) deactivate with (q)
-;; Activate with ([ hold then p) deactivate with ([)
-;; backspace with (t) and (u), with the thumb
-;; ctrl with (space bar), with the thumb
-;; alt with (lalt) and (ralt), with the thumb
-;; @fn with (rctl) and (super) with the thumb
-;; 
-;; shift with (w) and (p), with the pinky
-;; tab with (g) and (h)
-;; 
-;; @enter_navigation with (b)
-;; Shortcuts ctrl c v x z y.
-
-;; New ideas (2024-08-03):
-;; arrows and mouse will be separated conceptually, but mouse and scroll will be together.
-;; caps will only activate mouse functionality and the number 3 will activate arrows.
-;; locking functionality only for: arrows-lock and mouse-lock. scroll lock is not needed and adds complexity.
-;; unlocking unlocks all locks
-;; hold caps will hold the mouse layer
-;; hold [, hold = and hold 3 will hold the arrows layer
-;; tap caps, tap [, tap = and tap 3 will exit all layers if any is active. If not, [, = and 3 will tap the corresponding key. To tap caps, fn caps is needed.
-;; double tap caps locks the mouse layer. tap caps unlocks it.
-;; double tap ralt locks the mouse layer. tap ralt unlocks it.
-;; scroll can be accessed by holding [ in mouse mode. tapping [ will not produce anything.
-;; finally, arrows can be locked by taping - or p immediately after holding 3, = or [.
-
-
-;; New ideas (2026-02-08):
-;; Home row mods.
-
-
-;; (deflayer main
-;;   @esc _   _    _   _    _   _    _   _    _  _    _    _   _   @del 
-;;   @`    _    @2   @3   _    _    @6   _    _    _    _    _    @= @bspc 
-;;   @tab   _    _    _    _    _    _    _    _    _    _    @[   _ _ 
-;;   @caps   _    _    _    _    _    _    _    _    _    _    _    _  
-;;   _        _    _    _    _    _    _    _    _    _    _        _   
-;;   _      _    @lalt         _               _    _    @←   @↑ @↓   @→   
-;; )
-
-
-;; https://github.com/jtroo/kanata/discussions/1656#discussioncomment-14382030
-(defvirtualkeys
-  fasttypingstate XX
-)
-(defvar
-  tot 220  ;; time out tap
-)
-(deftemplate type (action)
-  (multi
-    (fork
-       (hold-for-duration 55 fasttypingstate)
-      XX
-      (lctl rctl lalt ralt lmet rmet)
-    )
-    $action
+  process-unmapped-keys yes   ;; required to make non mapped keys behave nicely with remapped ones
+  block-unmapped-keys no      ;; turns every other unmapped key into a non-op key
+  log-layer-changes no        ;; no logging
+  concurrent-tap-hold yes     ;; required to allow for combos and tap-hold-release features to coexist
+  delegate-to-first-layer yes ;; defaults to source, but this will default transparent keys (_) to first custom layer
+  chords-v2-min-idle 350      ;; same as require-prior-idle from ZMK but only for for combos
+  macos-dev-names-exclude (   ;; excludes my custom keyboards from macOS karabiner/kanata manipulation as they already have their own customized keymaps that mirrors this one with their advantages
+    "Totem"
+    "Sweep"
   )
 )
-(deftemplate home-row-mod- (timeouttap timeouthold keytap keyhold)
-  (switch
-    ((input virtual fasttypingstate)) (t! type $keytap) break
-    () (tap-hold $timeouttap $timeouthold
-         (t! type $keytap)
-         $keyhold
-       ) break
-  )
-)
-(deftemplate home-row-mod (keytap keyhold)
-  (t! home-row-mod- $tot 220 $keytap $keyhold)
-)
 
-(defsrc
-  esc  f1  f2   f3  f4   f5  f6   f7  f8   f9 f10  f11  f12 ins del
-  grv   1    2    3    4    5    6    7    8    9    0    -    = bspc
-  tab    q    w    e    r    t    y    u    i    o    p    [    ] \ 
-  caps    a    s    d    f    g    h    j    k    l    ;    '    ret
-  lsft     z    x    c    v    b    n    m    ,    .    /        rsft
-  lctl   lmet lalt          spc             ralt rctl left up down right
-)
-
-
-;; (defalias
-;;   s (t! type s)
-;;   d (t! type d)
-;; )
 (defvar
-  chord-timeout 50
-)
-(defchords chord-sd-tab $chord-timeout
-  (s  ) (t! type s)
-  (  d) (t! type d)
-  (s d) tab
-)
-(defchords chord-kl-ret $chord-timeout
-  (k  ) (t! type k)
-  (  l) (t! type l)
-  (k l) ret
-)
-(defchords chord-90-bspc $chord-timeout
-  (9  ) (t! type 9)
-  (  0) (t! type 0)
-  (9 0) (fork bspc (macro S-9 S-0) (sft))
-)
-(defchords chord-23-esc $chord-timeout
-  (2  ) (t! type 2)
-  (  3) (t! type 3)
-  (2 3) @esc
-)
-
-(deflayermap (base)
-  ;; Row of F keys
-  esc @esc
-
-  ;; Row of numbers
-  2    (chord chord-23-esc 2)
-  3    (chord chord-23-esc 3)
-  9    (chord chord-90-bspc 9)
-  0    (chord chord-90-bspc 0)
-
-  ;; Row of qwe
-  tab  (t! home-row-mod tab   @arrows-mouse)
-  q    (t! home-row-mod- $tot 350 q    lmet)
-  w    (t! home-row-mod w    lalt)
-  e    (t! home-row-mod e    lctl)
-  r    (t! type r)
-  t    (t! type t)
-  y    (t! type y)
-  u    (t! type u)
-  i    (t! home-row-mod i    rctl)
-  o    (t! home-row-mod o    lalt)
-  p    (t! home-row-mod- $tot 350 p    lmet)
-  [    (t! home-row-mod [     @arrows-mouse)
-  ]    (t! type ])
-
-  ;; Row of asd
-  caps (tap-hold 100 100 caps @num-FKeys)
-  a    (t! type a)
-  s    (chord chord-sd-tab s)
-  d    (chord chord-sd-tab d)
-  f    (t! home-row-mod f    lsft)
-  g    (t! type g)
-  h    (t! type h)
-  j    (t! home-row-mod j    rsft)
-  k    (chord chord-kl-ret k)
-  l    (chord chord-kl-ret l)
-  ;    (t! type ;)
-  '    (t! home-row-mod '    @num-FKeys)
+  ;; timings in ms using ZMK-like names
+  one-shot-timeout 60000                 ;; 60 seconds. Bonkers, I know…
+  tapping-term 300                       ;; A higher number allows for one handed modded keys reducing the chance of false-positives when typing fast
+  quick-tap-ms 200                       ;; same as ZMK ($tap-repress-timeout in Kanata docs)
+  require-prior-idle 250                 ;; same as ZMK (not used in vanilla kanata, but used as a workaround in this confit)  
+  combo-timeout 60                       ;; same as ZMK
   
-  ;; Row of z
-  z    (t! type z)
-  x    (t! type x)
-  c    (t! home-row-mod c    ralt)
-  v    (t! type v)
-  b    (t! type b) 
-  n    (t! type n)
-  m    (t! home-row-mod m    ralt)
-  ,    (t! type ,)
-  .    (t! type .)
-  /    (t! type /)
+  ;; keys for tap-hold-release-tap-keys-release templates
+  left-side-keys   (q w e r t x   c v b) ;; these keys will always make the precedent same hand tap-hold-release-tap-keys-release output tap. B is missing because I, sometimes, alt finger it
+  right-side-keys  (y u i o p m n , . ;) ;; these keys will always make the precedent same hand tap-hold-release-tap-keys-release output tap
+  home-row-left-keys  (a s d f g z)      ;; home row mods + z for fn  - these will output a tap if they're released after the first key
+  home-row-right-keys (h j k l ')        ;; home row mods             - these will output a tap if they're released after the first key
+)
 
-  F1   (tap-hold 200 600 F1  @L1)
-  F12  (tap-hold 200 600 F12 lrld)
+;; home row mods templates mimicking urob's timerless home row mods implementation
+(deftemplate lhrm (tappingterm tap-key hold-key)  ;; left hand mods
+  (tap-hold-release-tap-keys-release $quick-tap-ms $tappingterm (multi $tap-key @tap) $hold-key $left-side-keys $home-row-left-keys)
+)
 
-  spc  (tap-hold 200 200 spc nop2) ;; nop2=layer-lock
+(deftemplate rhrm (tappingterm tap-key hold-key)  ;; right hand mods
+  (tap-hold-release-tap-keys-release $quick-tap-ms $tappingterm (multi $tap-key @tap) $hold-key $right-side-keys $home-row-right-keys)
+)
 
-  ;; row of space
-  ralt (multi ralt nop1)
-  left @← up @↑ down @↓ right @→
+(deftemplate nomod (tap-key)
+  (multi $tap-key @tap)
 )
 
 (defalias
-  L0 (on-press press-vkey L0)
-  L1 (on-press press-vkey L1)
-  unlock      (on-press press-vkey unlock)
-  lock-arrows (on-press press-vkey lock-arrows)
-  lock-mouse  (on-press press-vkey lock-mouse)
-)
-(defalias esc  (multi esc @L0 @unlock )) ;; tap esc to exit custom layouts
+      hyper (multi lctrl lalt lshift lmet) ;; shorthand for hyper key used in several system shortcuts
 
-(defvirtualkeys
-  L1 (layer-while-held layout-IPA)
-  L2 (layer-while-held layout-cyrillic)
-  lock-arrows (layer-while-held arrows)
-  lock-mouse  (layer-while-held mouse)
-  ;; L3 (layer-while-held layout-emoji)
-)
-(defvirtualkeys
-  L0 (multi
-    (on-press release-vkey L1)
-    (on-press release-vkey L2)
-  )
-  unlock (multi
-    (on-press release-vkey lock-arrows)
-    (on-press release-vkey lock-mouse)
-  )
-)
-
-(defalias
-  arrows (multi
-    (layer-while-held arrows)
-    (fork XX (on-press press-vkey lock-arrows) (nop2))
-  )
-  mouse  (multi
-    (layer-while-held mouse)
-    (fork XX (on-press press-vkey lock-mouse) (nop2))
-  )
-)
-
-(defalias arrows-mouse (multi
-  @arrows
-  (fork XX @mouse (ralt nop1))
-))
-(defalias num-FKeys (multi
-  (layer-while-held num)
-  (fork XX (layer-while-held FKeys) (ralt nop1)))
-)
-
-(deflayer arrows
-  _   _     _    _   _    _   _    _   _     _  _    _      _      _   @del
-  _     _     _     _    _    _     _    _   _   @←←  @→→    _   _  @bspc
-  _       =    @'*   @[*  ]    _   C-y @bspc @↑   @→   @C→  _   XX    @*TeX
-  _         -    \    /    @⊂  @⊃ @C← @←    @↓   @del  XX XX            _ 
-  _          C-z  C-x  C-c  C-v XX @btn1 @btn2 @*IPA _   _            _
-  _           _  _  (tap-hold 200 200 spc lsft) nop1 _    _   _   _   _
-)
-
-(deflayermap mouse
-  j @🖱←   i @🖱↑  k @🖱↓   o @🖱→
-  p @☸↑  l @☸↓  9 @☸←  0 @☸→
-  n 🖰1    m 🖰2
-  x C-x   z C-z  c C-c    v C-v    y C-y
-  u XX
-  lalt nop2 ;; slow movements
-  rctl nop2 ;; slow movements
-  spc (tap-hold 200 200 spc (layer-while-held mouse))
-)
-
-(deflayermap num
-  q (t! home-row-mod 1 lmet)
-  w (t! home-row-mod 2 lalt)
-  e (t! home-row-mod 3 lctl)
-  f (t! home-row-mod 4 lsft)
-  g (t! type 5)
-  h (t! type 6)
-  j (t! home-row-mod 7 rsft)
-  i (t! home-row-mod 8 rctl)
-  o (t! home-row-mod 9 lalt)
-  p (t! home-row-mod 0 ralt)
-  m '  k [  l ]  ; \
-  a \  s `  d -  v =
-  spc (tap-hold 200 200 spc (layer-while-held num))
-)
-(deflayermap FKeys
-  q (t! home-row-mod (fork F1  @fn-F1  (nop1)) lmet)
-  w (t! home-row-mod (fork F2  @fn-F2  (nop1)) lalt)
-  e (t! home-row-mod (fork F3  @fn-F3  (nop1)) lctl)
-  f (t! home-row-mod (fork F4  @fn-F4  (nop1)) lsft)
-  g (t! type         (fork F5  @fn-F5  (nop1)))
-  h (t! type         (fork F6  @fn-F6  (nop1)))
-  j (t! home-row-mod (fork F7  @fn-F7  (nop1)) rsft)
-  i (t! home-row-mod (fork F8  @fn-F8  (nop1)) rctl)
-  o (t! home-row-mod (fork F9  @fn-F9  (nop1)) lalt)
-  p (t! home-row-mod (fork F10 @fn-F10 (nop1)) ralt)
-  r (t! type         (fork F11 @fn-F11 (nop1)))
-  u (t! type         (fork F12 @fn-F12 (nop1)))
-  t PrintScreen
-  y PrintScreen
-  ralt (multi nop1 (layer-while-held FKeys)) ;; fn keys
-  spc (tap-hold 200 200 spc (layer-while-held FKeys))
-)
-(defalias
-  ;; names: https://github.com/jtroo/kanata/blob/main/parser/src/keys/mod.rs
-  fn-F1 mute
-  fn-F2 VolumeDown
-  fn-F3 VolumeUp
-  fn-F4 blup
-  fn-F5 bldn
-  fn-F6 brup
-  fn-F7 brdown
-  fn-F8 XX
-  fn-F9 XX
-  fn-F10 PrintScreen
-  fn-F11 home
-  fn-F12 end
-)
-
-
-(defalias
-  ⊂ (t! home-row-mod S-9 lsft)
-  ⊃ S-0
-  [* (t! home-row-mod [ lctl)
-  '* (t! home-row-mod ' lalt)
-)
-
-;; Reference layers for copy-paste
-(deflayer empty
-  _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
-  _     _    _    _    _    _    _    _    _    _    _    _    _ _   
-  _      _    _    _    _    _    _    _    _    _    _    _    _ _ 
-  _       _    _    _    _    _    _    _    _    _    _    _    _  
-  _        _    _    _    _    _    _    _    _    _    _        _   
-  _      _    _             _               _    _    _    _  _    _    
-)
-(deflayer disabled
-  XX   XX  XX   XX  XX   XX  XX   XX  XX   XX XX   XX   XX  XX  XX 
-  XX    XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX XX  
-  XX     XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX XX 
-  XX      XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX 
-  XX       XX   XX   XX   XX   XX   XX   XX   XX   XX   XX       XX  
-  XX     XX   XX            XX              XX   XX   XX   XX XX   XX   
-)
-;; Tip. Use: (multi (layer-while-held disabled) (layer-while-held some-layer)) to block all keys but those defined in some-layer
-
-
-;; ----------------------------------------------------------
-;; Mouse layer
-;; ----------------------------------------------------------
-
-(deftemplate  def-accel (key-name the-key delay-1 delay-2 delay-3 delay-4 delay-*)
-  (defvirtualkeys $key-name (macro⟳↑⤫ ($the-key 1 $delay-*) 25))
-  (defalias $key-name
-    (multi
-      (macro-release-cancel
-        ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25
-        ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25
-        ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25
-        ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25
-        ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25
-        ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25
-        ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25
-        ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25
-        ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25
-        ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25
-        ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25
-        ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25
-        (on-press press-vkey $key-name) ;; this repeats delay-* forever
+      ;; quasi-zmk's 'require-prior-idle' behavior
+      tap (multi                                             
+        (layer-switch nomods)                                ;; temporarily switches to a layer with no home row mods enabled
+        (on-idle $require-prior-idle tap-virtualkey to-base) ;; when $require-prior-idle expires, uses the fake key to return to base layer (see )
       )
-      (on-release release-vkey  $key-name)
-    )
-  )
-)
-;; Mouse movements (normal and slow)
-;; (t! def-accel  🖱↑n   🖱↑   50 150 400 1500 2500)
-;; (t! def-accel  🖱→n   🖱→   50 150 400 1500 2500)
-;; (t! def-accel  🖱←n   🖱←   50 150 400 1500 2500)
-;; (t! def-accel  🖱↓n   🖱↓   50 150 400 1500 2500)
-;; Scrollwheel movements (normal and slow)
-(t! def-accel  ☸↑n   🖱☸↑   5 15 40 150 250)
-(t! def-accel  ☸→n   🖱☸→   5 15 40 150 250)
-(t! def-accel  ☸←n   🖱☸←   5 15 40 150 250)
-(t! def-accel  ☸↓n   🖱☸↓   5 15 40 150 250)
-(t! def-accel  ☸↑s   🖱☸↑   5 10 20 30 50)
-(t! def-accel  ☸→s   🖱☸→   5 10 20 30 50)
-(t! def-accel  ☸←s   🖱☸←   5 10 20 30 50)
-(t! def-accel  ☸↓s   🖱☸↓   5 10 20 30 50)
 
-(defalias
-  ☸↑ (fork @☸↑n @☸↑s (nop2))
-  ☸→ (fork @☸→n @☸→s (nop2))
-  ☸← (fork @☸←n @☸←s (nop2))
-  ☸↓ (fork @☸↓n @☸↓s (nop2))
-)
-(defalias
-  🖱↑n  (🖱accel↑ 5 300 1 10)
-  🖱→n  (🖱accel→ 5 300 1 10)
-  🖱←n  (🖱accel← 5 300 1 10)
-  🖱↓n  (🖱accel↓ 5 300 1 10)
-  🖱↑s  (🖱accel↑ 25 300 1 10)
-  🖱→s  (🖱accel→ 25 300 1 10)
-  🖱←s  (🖱accel← 25 300 1 10)
-  🖱↓s  (🖱accel↓ 25 300 1 10)
-  🖱↑ (fork (fork @🖱↑n @☸↑ (nop1)) @🖱↑s (nop2))
-  🖱→ (fork (fork @🖱→n @☸→ (nop1)) @🖱→s (nop2))
-  🖱← (fork (fork @🖱←n @☸← (nop1)) @🖱←s (nop2))
-  🖱↓ (fork (fork @🖱↓n @☸↓ (nop1)) @🖱↓s (nop2))
-)
-
-;; ----------------------------------------------------------
-;; Tab and arrows layer
-;; ----------------------------------------------------------
-
-;; Dummy empty layer to change the icon in kanata-tray
-(deflayermap (sldr-on))
-(defvirtualkeys sldr-on (layer-while-held sldr-on))
-(defvirtualkeys sldr-off (on-press release-vkey sldr-on))
-(defalias *sldr (multi
-  (on-press press-vkey sldr-on)
-  (on-idle 1 tap-vkey sldr-off)
-))
-
-;; nop0 is the "go to extreme" button <=>l
-;; nop3 is a "ctl" button. All ctl buttons trigger nop3, except the tab key for which certain keys are unmoded.
-;; Repeated arrow means ctrl+arrow (word jump). Only defined for left and right.
-(defalias ←    left)
-(defalias ↑    (fork up   @☸↑ (nop1)))
-(defalias ↓    (fork down @☸↓ (nop1)))
-(defalias →    right)
-(defalias C←   (tap-hold 200 300 C-left (macro home)))
-(defalias C→   (tap-hold 200 300 C-right (macro end)))
-(defalias ←←   (fork home pgup (nop1)))
-(defalias →→   (fork end  pgdn (nop1)))
-
-(defalias *TeX (multi @*sldr (macro (unicode *) 150 bspc sldr 5 \)))
-(defalias *IPA (multi @*sldr (macro (unicode *) 150 bspc sldr 5 S-`)))
-
-(defalias btn1 (fork ret   🖰1   (nop1)))
-(defalias btn2 (fork @*TeX 🖰2   (nop1)))
-(defalias btn3 (fork ContextMenu   🖰3   (nop1)))
-(defalias bspc (tap-hold 200 600 bspc (macro S-home (unmod bspc))))
-(defalias del  (tap-hold 200 600 del  (macro S-end  (unmod del ))))
-
-;; Either there is a bug of a hardware issue when pressing multiple keys (holding three and pressing the fourh): (` = ralt o) works and (` = ralt j) works, but (` = ralt i) and (` = ralt j) don't. The software doesn't detect it at all.
-
-;; ----------------------------------------------------------
-;; Custom layouts and sldr commands (mostly TeX)
-;; ----------------------------------------------------------
-
-
-(deftemplate def-seq (vk-name input-keys output-action)
-  (defvirtualkeys $vk-name $output-action)
-  (defseq $vk-name $input-keys)
-)
-(t! def-seq \\ (\ \) (macro \ \))
-(t! def-seq \check        (\ c h e c k                 spc) (unicode ✓))
-(t! def-seq \wheel        (\ w h e e l                 spc) (unicode ☸))
-(t! def-seq \mouse        (\ m o u s e                 spc) (unicode 🖱))
-(t! def-seq \upcheck      (\ S-c h e c k               spc) (macro 🔣✔ 🔣✅))
-(t! def-seq \checkbox     (\ c h e c k b o x           spc) (macro 🔣☐ 🔣🗹 🔣🗷 🔣☑ 🔣☒ 🔣❌ 🔣❎ 🔣🗵 🔣⮽ 🔣🗳))
-(t! def-seq \cross        (\ c r o s s                 spc) (unicode ✗))
-(t! def-seq \upcross      (\ S-c r o s s               spc) (macro 🔣✘ 🔣🗴 🔣🗶))
-(t! def-seq \perp         (\ p e r p                   spc) (unicode ⟂))
-(t! def-seq \alpha        (\ a l p h a                 spc) (unicode α))
-(t! def-seq \beta         (\ b e t a                   spc) (unicode β))
-(t! def-seq \gamma        (\ g a m m a                 spc) (unicode γ))
-(t! def-seq \upgamma      (\ S-g a m m a               spc) (unicode Γ))
-(t! def-seq \delta        (\ d e l t a                 spc) (unicode δ))
-(t! def-seq \updelta      (\ S-d e l t a               spc) (unicode Δ))
-(t! def-seq \eps          (\ e p s                     spc) (unicode ϵ))
-(t! def-seq \epsilon      (\ e p s i l o n             spc) (unicode ϵ))
-(t! def-seq \pi           (\ p i                       spc) (unicode π))
-(t! def-seq \uppi         (\ S-p i                     spc) (unicode Π))
-(t! def-seq \sigma        (\ s i g m a                 spc) (unicode σ))
-(t! def-seq \upsigma      (\ S-s i g m a               spc) (unicode Σ))
-(t! def-seq \lambda       (\ l a m b d a               spc) (unicode λ))
-(t! def-seq \uplambda     (\ S-l a m b d a             spc) (unicode Λ))
-(t! def-seq \omega        (\ o m e g a                 spc) (unicode ω))
-(t! def-seq \upomega      (\ S-o m e g a               spc) (unicode Ω))
-(t! def-seq \theta        (\ t h e t a                 spc) (unicode θ))
-(t! def-seq \uptheta      (\ S-t h e t a               spc) (unicode Θ))
-(t! def-seq \phi          (\ p h i                     spc) (unicode ϕ))
-(t! def-seq \upphi        (\ S-p h i                   spc) (unicode Φ))
-(t! def-seq \vartheta     (\ v a r t h e t a           spc) (unicode ϑ))
-(t! def-seq \tau          (\ t a u                     spc) (unicode τ))
-(t! def-seq \rho          (\ r h o                     spc) (unicode ρ))
-(t! def-seq \mu           (\ m u                       spc) (unicode μ))
-(t! def-seq \nu           (\ n u                       spc) (unicode ν))
-(t! def-seq \eta          (\ e t a                     spc) (unicode η))
-(t! def-seq \kappa        (\ k a p p a                 spc) (unicode κ))
-(t! def-seq \iota         (\ i o t a                   spc) (unicode ι))
-(t! def-seq \upsilon      (\ u p s i l o n             spc) (unicode υ))
-(t! def-seq \chi          (\ c h i                     spc) (unicode χ))
-(t! def-seq \zeta         (\ z e t a                   spc) (unicode ζ))
-(t! def-seq \xi           (\ x i                       spc) (unicode ξ))
-(t! def-seq \upxi         (\ S-x i                     spc) (unicode Ξ))
-(t! def-seq \down         (\ d o w n                   spc) (unicode ↓))
-(t! def-seq \up           (\ u p                       spc) (unicode ↑ ))
-(t! def-seq \mapsto       (\ m a p s t o               spc) (unicode ↦))
-(t! def-seq \rightarrow   (\ r i g h t a r r o w       spc) (unicode →))
-(t! def-seq \leftarrow    (\ l e f t a r r o w         spc) (unicode ←))
-(t! def-seq \left         (\ l e f t                   spc) (unicode ←))
-(t! def-seq \right        (\ r i g h t                 spc) (unicode →))
-(t! def-seq \to           (\ t o                       spc) (unicode →))
-(t! def-seq \leftrightarrow (\ l e f t r i g h t a r r o w spc) (unicode ↔))
-(t! def-seq \leftright    (\ l e f t r i g h t         spc) (unicode ↔))
-(t! def-seq \lr           (\ l r                       spc) (unicode ↔))
-(t! def-seq \proportional (\ p r o p o r t i o n a l   spc) (unicode ∝))
-(t! def-seq \propto       (\ p r o p t o               spc) (unicode ∝))
-(t! def-seq \prop         (\ p r o p                   spc) (unicode ∝))
-(t! def-seq \approx       (\ a p p r o x               spc) (unicode ≈))
-(t! def-seq \neq          (\ n e q                     spc) (unicode ≠))
-(t! def-seq \eqdef        (\ e q d e f                 spc) (unicode ≝))
-(t! def-seq \le           (\ l e                       spc) (unicode ≤))
-(t! def-seq \leq          (\ l e q                     spc) (unicode ≤))
-(t! def-seq \ge           (\ g e                       spc) (unicode ≥))
-(t! def-seq \geq          (\ g e q                     spc) (unicode ≥))
-(t! def-seq \sum          (\ s u m                     spc) (unicode ∑))
-(t! def-seq \int          (\ i n t                     spc) (unicode ∫))
-(t! def-seq \partial      (\ p a r t i a l             spc) (unicode ∂))
-(t! def-seq \forall       (\ f o r a l l               spc) (unicode ∀))
-(t! def-seq \exists       (\ e x i s t s               spc) (unicode ∃))
-(t! def-seq \notexists    (\ n o t e x i s t s         spc) (unicode ∄))
-(t! def-seq \not          (\ n o t                     spc) (unicode ¬))
-(t! def-seq \qed          (\ q e d                     spc) (unicode ∎))
-(t! def-seq \inner        (\ i n n e r                 spc) (macro 🔣⟨ 🔣⟩))
-(t! def-seq \floor        (\ f l o o r                 spc) (macro 🔣⌊ 🔣⌋))
-(t! def-seq \ceil         (\ c e i l                   spc) (macro 🔣⌈ 🔣⌉))
-(t! def-seq \round        (\ r o u n d                 spc) (macro 🔣⌊ 🔣⌉))
-(t! def-seq \in           (\ i n                       spc) (unicode ∈))
-(t! def-seq \notin        (\ n o t i n                 spc) (unicode ∉))
-(t! def-seq \infty        (\ i n f t y                 spc) (unicode ∞))
-(t! def-seq \oo           (\ o o                       spc) (unicode ∞))
-(t! def-seq \cdots        (\ c d o t s                 spc) (unicode ⋯))
-(t! def-seq \dag          (\ d a g                     spc) (unicode †))
-(t! def-seq \planck       (\ p l a n c k               spc) (unicode ħ))
-(t! def-seq \rangle       (\ r a n g l e               spc) (unicode 〉))
-(t! def-seq \langle       (\ l a n g l e               spc) (unicode 〈))
-(t! def-seq \cala         (\ c a l a                   spc) (unicode 𝓐))
-(t! def-seq \bba          (\ b b a                     spc) (unicode 𝔸))
-(t! def-seq \calb         (\ c a l b                   spc) (unicode 𝓑))
-(t! def-seq \calc         (\ c a l c                   spc) (unicode 𝓒))
-(t! def-seq \cald         (\ c a l d                   spc) (unicode 𝓓))
-(t! def-seq \cale         (\ c a l e                   spc) (unicode 𝓔))
-(t! def-seq \bbe          (\ b b e                     spc) (unicode 𝔼))
-(t! def-seq \calf         (\ c a l f                   spc) (unicode 𝓕))
-(t! def-seq \calg         (\ c a l g                   spc) (unicode 𝓖))
-(t! def-seq \calh         (\ c a l h                   spc) (unicode 𝓗))
-(t! def-seq \call         (\ c a l l                   spc) (unicode 𝓛))
-(t! def-seq \calm         (\ c a l m                   spc) (unicode 𝓜))
-(t! def-seq \caln         (\ c a l n                   spc) (unicode 𝓝))
-(t! def-seq \bbn          (\ b b n                     spc) (unicode ℕ))
-(t! def-seq \calp         (\ c a l p                   spc) (unicode 𝓟))
-(t! def-seq \bbp          (\ b b p                     spc) (unicode ℙ))
-(t! def-seq \calq         (\ c a l q                   spc) (unicode 𝓠))
-(t! def-seq \bbq          (\ b b q                     spc) (unicode ℚ))
-(t! def-seq \calr         (\ c a l r                   spc) (unicode 𝓡))
-(t! def-seq \bbr          (\ b b r                     spc) (unicode ℝ))
-(t! def-seq \calu         (\ c a l u                   spc) (unicode 𝓤))
-(t! def-seq \calw         (\ c a l w                   spc) (unicode 𝓦))
-(t! def-seq \calx         (\ c a l x                   spc) (unicode 𝓧))
-(t! def-seq \caly         (\ c a l y                   spc) (unicode 𝓨))
-(t! def-seq \calz         (\ c a l z                   spc) (unicode 𝓩))
-(t! def-seq \parallel     (\ p a r a l l e l           spc) (unicode ∥))
-(t! def-seq \norm         (\ n o r m                   spc) (macro 🔣‖ 🔣· 🔣‖))
-(t! def-seq \noteq        (\ n o t e q                 spc) (unicode ≠))
-(t! def-seq \cdot         (\ c d o t                   spc) (unicode ·))
-(t! def-seq \bbone        (\ b b o n e                 spc) (unicode 𝟙))
-(t! def-seq \rr           (\ r r                       spc) (unicode ≫))
-(t! def-seq \ll           (\ l l                       spc) (unicode ≪))
-(t! def-seq \equiv        (\ e q u i v                 spc) (unicode ≡))
-(t! def-seq \isomorphic   (\ i s o m o r p h i c       spc) (unicode ≌))
-(t! def-seq \entails      (\ e n t a i l s             spc) (macro 🔣⊢ 🔣⊦ 🔣⊧ 🔣⊨))
-(t! def-seq \minusplus    (\ m i n u s p l u s         spc) (unicode ∓))
-(t! def-seq \circ         (\ c i r c                   spc) (unicode ∘))
-(t! def-seq \play         (\ p l a y                   spc) (unicode ⊳))
-(t! def-seq \then         (\ t h e n                   spc) (unicode ⊳))
-(t! def-seq \bot          (\ b o t                     spc) (unicode ⊥))
-(t! def-seq \top          (\ t o p                     spc) (unicode ⊤))
-(t! def-seq \oplus        (\ o p l u s                 spc) (unicode ⊕))
-(t! def-seq \times        (\ t i m e s                 spc) (unicode ×))
-(t! def-seq \transpose    (\ t r a n s p o s e         spc) (unicode ᵀ))
-(t! def-seq \bullet       (\ b u l l e t               spc) (unicode •))
-(t! def-seq \normal       (\ n o r m a l               spc) (macro 🔣~ 🔣𝓝 \( 🔣μ 🔣, spc 🔣σ 🔣² \) ))
-(t! def-seq \prod         (\ p r o d                   spc) (unicode π))
-(t! def-seq \sqrt3        (\ s q r t 3                 spc) (unicode ∛))
-(t! def-seq \sqrt         (\ s q r t                   spc) (unicode √))
-(t! def-seq \uomega       (\ u o m e g a               spc) (unicode ω))
-(t! def-seq \ulambda      (\ u l a m b d a             spc) (unicode λ))
-(t! def-seq \upi          (\ u p i                     spc) (unicode ∏))
-(t! def-seq \usigma       (\ u s i g m a               spc) (unicode ∑))
-(t! def-seq \udelta       (\ u d e l t a               spc) (unicode δ))
-(t! def-seq \ugamma       (\ u g a m m a               spc) (unicode γ))
-(t! def-seq \over         (\ o v e r                   spc) (unicode ⁄))
-(t! def-seq \frac         (\ f r a c                   spc) (unicode ⁄))
-(t! def-seq \varepsilon   (\ v a r e p s i l o n       spc) (unicode ε))
-(t! def-seq \nxn          (\ n x n                     spc) (macro 🔣n 🔣× 🔣n))
-(t! def-seq \mxn          (\ m x n                     spc) (macro 🔣m 🔣× 🔣n))
-(t! def-seq \notparallel  (\ n o t p a r a l l e l     spc) (unicode ∦))
-(t! def-seq \nparallel    (\ n p a r a l l e l         spc) (unicode ∦))
-(t! def-seq \notsubseteq  (\ n o t s u b s e t e q     spc) (unicode ⊈))
-(t! def-seq \supseteq     (\ s u p s e t e q           spc) (unicode ⊇))
-(t! def-seq \subseteq     (\ s u b s e t e q           spc) (unicode ⊆))
-(t! def-seq \notsupset    (\ n o t s u p s e t         spc) (unicode ⊅))
-(t! def-seq \notsubset    (\ n o t s u b s e t         spc) (unicode ⊄))
-(t! def-seq \supset       (\ s u p s e t               spc) (unicode ⊃))
-(t! def-seq \subset       (\ s u b s e t               spc) (unicode ⊂))
-(t! def-seq \notsupseteq  (\ n o t s u p s e t e q     spc) (unicode ⊉))
-(t! def-seq \emptyset     (\ e m p t y s e t           spc) (unicode ∅))
-(t! def-seq \bigcup       (\ c u p                     spc) (unicode ⋃))
-(t! def-seq \bigcap       (\ c a p                     spc) (unicode ⋂))
-(t! def-seq \vee          (\ v e e                     spc) (unicode ∨))
-(t! def-seq \wedge        (\ w e d g e                 spc) (unicode ∧))
-(t! def-seq \land         (\ l a n d                   spc) (unicode ⋀))
-(t! def-seq \lor          (\ l o r                     spc) (unicode ⋁))
-(t! def-seq \therefore    (\ t h e r e f o r e         spc) (unicode ∴))
-(t! def-seq \coloneq      (\ c o l o n e q             spc) (unicode ≔))
-(t! def-seq \:=           (\ S-; =                     spc) (unicode ≔))
-(t! def-seq \ne           (\ n e                       spc) (unicode ≠))
-(t! def-seq \dash         (\ d a s h                   spc) (unicode —))
-(t! def-seq \emdash       (\ e m d a s h               spc) (unicode —))
-(t! def-seq \em           (\ e m                       spc) (unicode —))
-(t! def-seq \grad         (\ g r a d                   spc) (unicode ∇))
-(t! def-seq \nabla        (\ n a b l a                 spc) (unicode ∇))
-(t! def-seq ==>           (\ = = S-,                   spc) (unicode ⇒))
-(t! def-seq 2/3           (\ 2 / 3                     spc) (unicode ⅔))
-(t! def-seq tm            (\ t m                       spc) (unicode ™))
-(t! def-seq 7/8           (\ 7 / 8                     spc) (unicode ⅞))
-(t! def-seq 5/6           (\ 5 / 6                     spc) (unicode ⅚))
-(t! def-seq 5/8           (\ 5 / 8                     spc) (unicode ⅝))
-(t! def-seq 3/5           (\ 3 / 5                     spc) (unicode ⅗))
-(t! def-seq 3/4           (\ 3 / 4                     spc) (unicode ¾))
-(t! def-seq <==           (\ S-, = =                   spc) (unicode ⇐))
-(t! def-seq 2/5           (\ 2 / 5                     spc) (unicode ⅖))
-(t! def-seq <=>           (\ S-, = S-.                 spc) (unicode ⇔))
-(t! def-seq 3/8           (\ 3 / 8                     spc) (unicode ⅜))
-(t! def-seq 4/5           (\ 4 / 5                     spc) (unicode ⅘))
-(t! def-seq -->           (\ - - S-.                   spc) (unicode →))
-(t! def-seq ...           (\ . . .                     spc) (unicode …))
-(t! def-seq <--           (\ S-, - -                   spc) (unicode ←))
-(t! def-seq 1/6           (\ 1 / 6                     spc) (unicode ⅙))
-(t! def-seq 1/8           (\ 1 / 8                     spc) (unicode ⅛))
-(t! def-seq 1/3           (\ 1 / 3                     spc) (unicode ⅓))
-(t! def-seq 1/2           (\ 1 / 2                     spc) (unicode ½))
-(t! def-seq c/o           (\ c / o                     spc) (unicode ℅))
-(t! def-seq 1/5           (\ 1 / 5                     spc) (unicode ⅕))
-(t! def-seq 1/4           (\ 1 / 4                     spc) (unicode ¼))
-(t! def-seq =:            (\ = S-;                     spc) (unicode ≕))
-(t! def-seq ^t            (\ S-6 t                     spc) (unicode ᵀ))
-(t! def-seq ^T            (\ S-6 S-t                   spc) (unicode ᵀ))
-(t! def-seq ^{-1}         (\ S-6 { - 1 }               spc) (macro 🔣⁻🔣¹))
-(t! def-seq ^-1           (\ S-6 - 1                   spc) (macro 🔣⁻🔣¹))
-(t! def-seq ^+            (\ S-6 S-=                   spc) (unicode ⁺))
-(t! def-seq ^w            (\ S-6 w                     spc) (unicode ʷ))
-(t! def-seq ^j            (\ S-6 j                     spc) (unicode ʲ))
-(t! def-seq ^h            (\ S-6 h                     spc) (unicode ʰ))
-(t! def-seq _i=1..        (\ S-- i = 1 . .             spc) (macro 🔣ᵢ 🔣₌ 🔣₁ 🔣₂ 🔣. 🔣. 🔣ₙ 🔣ₘ))
-(t! def-seq _=            (\ S-- =                     spc) (unicode ₌))
-(t! def-seq _x            (\ S-- x                     spc) (unicode ₓ))
-(t! def-seq ^k            (\ S-6 k                     spc) (unicode ᵏ))
-(t! def-seq _k            (\ S-- k                     spc) (unicode ₖ))
-(t! def-seq _j            (\ S-- j                     spc) (unicode ⱼ))
-(t! def-seq _1..m         (\ S-- 1 . . m               spc) (macro 🔣₁ 🔣. 🔣. 🔣ₘ))
-(t! def-seq _m            (\ S-- m                     spc) (unicode ₘ))
-(t! def-seq _n            (\ S-- n                     spc) (unicode ₙ))
-(t! def-seq ^d            (\ S-6 d                     spc) (unicode ᵈ))
-(t! def-seq ^m            (\ S-6 m                     spc) (unicode ᵐ))
-(t! def-seq ^i            (\ S-6 i                     spc) (unicode ⁱ))
-(t! def-seq ^n            (\ S-6 n                     spc) (unicode ⁿ))
-(t! def-seq _0            (\ S-- 0                     spc) (unicode ₀))
-(t! def-seq _1            (\ S-- 1                     spc) (unicode ₁))
-(t! def-seq _i            (\ S-- i                     spc) (unicode ᵢ))
-(t! def-seq _1..n         (\ S-- 1 . . n               spc) (macro 🔣₁ 🔣. 🔣. 🔣ₙ))
-(t! def-seq ^2            (\ S-6 2                     spc) (unicode ²))
-(t! def-seq 1/n           (\ 1 / n                     spc) (macro 🔣¹ 🔣⁄ 🔣ₙ))
-(t! def-seq ,...,         (\ , . . . ,                 spc) (macro 🔣, 🔣… 🔣,))
-(t! def-seq ,...          (\ , . . .                   spc) (macro 🔣, 🔣…))
-(t! def-seq +...+         (\ S-= . . . S-=             spc) (macro 🔣+ 🔣⋯ 🔣+))
-(t! def-seq ...+          (\ . . . S-=                 spc) (macro 🔣⋯ 🔣+))
-(t! def-seq ...,          (\ . . . ,                   spc) (macro 🔣… 🔣,))
-(t! def-seq 1/            (\ 1 /                       spc) (macro 🔣¹ 🔣⁄))
-(t! def-seq 2/            (\ 2 /                       spc) (macro 🔣² 🔣⁄))
-(t! def-seq _123          (\ S-- 1 2 3                 spc) (macro 🔣₁ 🔣₂ 🔣₃ 🔣₄ 🔣₅ 🔣₆ 🔣₇ 🔣₈ 🔣₉ 🔣₀))
-(t! def-seq ^123          (\ S-6 1 2 3                 spc) (macro 🔣¹ 🔣² 🔣³ 🔣⁴ 🔣⁵ 🔣⁶ 🔣⁷ 🔣⁸ 🔣⁹ 🔣⁰))
-
-(t! def-seq ~:            (S-` S-;                     spc) (unicode ː))
-(t! def-seq ~'            (S-` '                       spc) (unicode ˈ))
-(t! def-seq ~''           (S-` S-'                     spc) (unicode ˈ))
-(t! def-seq ~A            (S-` a                       spc) (unicode ʌ))
-(t! def-seq ~ae           (S-` a e                     spc) (unicode æ))
-(t! def-seq ~aw           (S-` a w                     spc) (unicode ɑ))
-(t! def-seq ~B            (S-` b                       spc) (unicode β))
-(t! def-seq ~bh           (S-` b h                     spc) (unicode β))
-(t! def-seq ~c            (S-` c                       spc) (unicode ç)) ;; ich
-(t! def-seq ~D            (S-` d                       spc) (unicode ð))
-(t! def-seq ~dh           (S-` d h                     spc) (unicode ð))
-(t! def-seq ~dz           (S-` d z                     spc) (unicode ʣ))
-(t! def-seq ~dzh          (S-` d z h                   spc) (unicode ʤ))
-
-;; =========================
-;; e-types and rhotic vowels:
-;;   e  --> er (GA), ehr(RP): about, sofa, taken, fr:je --> teacher, doctor, butter
-;;   è  --> èr (GA), èhr(RP): bed, ten, said, fr:crème --> hair, square, care, bear
-;;      --> Er (GA), Ehr(RP): --> her, bird, word, nurse, serve, learn (stressed)
-;;   ee --> ir (GA), ihr(RP): bee --> near, serious, here
-;; =========================
-(t! def-seq ~e            (S-` e                       spc) (unicode ə))   ;; about, sofa, taken, fr:je
-(t! def-seq ~er           (S-` e r                     spc) (unicode ɚ))   ;; GA teacher, butter, doctor (unstressed)
-(t! def-seq ~ehr          (S-` e h r                   spc) (macro 🔣ə (unicode "(") 🔣ɹ (unicode ")")))   ;; RP of er
-(t! def-seq ~è            (S-` RA-e                    spc) (unicode ɛ))   ;; bed, ten, said, fr:crème
-(t! def-seq ~èr           (S-` RA-e r                  spc) (macro 🔣ɛ 🔣ɹ))   ;; GA hair, square, care, bear (AmE)
-(t! def-seq ~èhr          (S-` RA-e h r                spc) (macro 🔣ɛ 🔣ə))   ;; RP of èr
-(t! def-seq ~Er           (S-` S-e r                   spc) (unicode ɝ))   ;; GA bird, word, girl, nurse, serve, learn (stressed)
-(t! def-seq ~Ehr          (S-` S-e h r                 spc) (macro 🔣ɜ 🔣ː))  ;; RP of Er
-(t! def-seq ~ee           (S-` e e                     spc) (macro 🔣i 🔣ː))  ;; see, fleece, machine
-(t! def-seq ~ir           (S-` i r                     spc) (macro 🔣ɪ 🔣ɹ))   ;; GA near, serious, here (AmE)
-(t! def-seq ~ihr          (S-` i h r                   spc) (macro 🔣ɪ 🔣ə))   ;; RP of ihr
-
-(t! def-seq ~g            (S-` g                       spc) (unicode ɣ))
-(t! def-seq ~gh           (S-` g h                     spc) (unicode ɣ))
-(t! def-seq ~h            (S-` h                       spc) (unicode ʰ))
-(t! def-seq ~i            (S-` i                       spc) (unicode ɪ))
-(t! def-seq ~j            (S-` j                       spc) (unicode ʒ)) ;; je, vision
-(t! def-seq ~k            (S-` k                       spc) (unicode ʞ))
-(t! def-seq ~l            (S-` l                       spc) (unicode ʎ))
-(t! def-seq ~lh           (S-` l h                     spc) (unicode ʎ))
-(t! def-seq ~l-           (S-` l -                     spc) (unicode ɫ))
-(t! def-seq ~m            (S-` m                       spc) (unicode ɱ))
-(t! def-seq ~gn           (S-` g n                     spc) (unicode ɳ)) ;; toño
-(t! def-seq ~ñ            (S-` RA-n                    spc) (unicode ɳ)) ;; toño
-(t! def-seq ~ng           (S-` n g                     spc) (unicode ŋ)) ;; singer, con_un_amigo
-(t! def-seq ~ò            (S-` ` o                     spc) (unicode ɔ)) ;; crawl
-(t! def-seq ~ô            (S-` S-6 o                   spc) (unicode ɒ)) ;; palm
-;; (t! def-seq ~ö            (S-` S-6 o                   spc) (unicode ø))
-(t! def-seq ~oe           (S-` o e                     spc) (unicode œ))
-(t! def-seq ~ph           (S-` p h                     spc) (unicode ɸ))
-;; (t! def-seq ~R            (S-` r                       spc) (unicode ɾ ɹ ʁ ʀ))
-(t! def-seq ~r            (S-` r                       spc) (unicode ɾ))
-(t! def-seq ~R            (S-` S-r                     spc) (unicode ʁ))
-(t! def-seq ~rh           (S-` r h                     spc) (unicode ɹ))
-(t! def-seq ~S            (S-` s                       spc) (unicode ʃ))
-(t! def-seq ~sh           (S-` s h                     spc) (unicode ʃ))
-(t! def-seq ~T            (S-` t                       spc) (unicode θ))
-(t! def-seq ~th           (S-` t h                     spc) (unicode θ))
-(t! def-seq ~ts           (S-` t s                     spc) (unicode ʦ))
-(t! def-seq ~ch           (S-` c h                     spc) (unicode ʧ))
-(t! def-seq ~tsh          (S-` t s h                   spc) (unicode ʧ))
-(t! def-seq ~u            (S-` u                       spc) (unicode ʊ))
-(t! def-seq ~V            (S-` v                       spc) (unicode ʋ))
-(t! def-seq ~W            (S-` w                       spc) (unicode ʷ))
-(t! def-seq ~X            (S-` x                       spc) (unicode χ))
-(t! def-seq ~xh           (S-` x h                     spc) (unicode ɕ))
-(t! def-seq ~y            (S-` y                       spc) (unicode ʏ))
-(t! def-seq ~Z            (S-` z                       spc) (unicode ʒ))
-(t! def-seq ~zh           (S-` z h                     spc) (unicode ʒ))
-
-
-
-;; https://help.keyman.com/keyboard/kreative_superipa/1.1/kreative_superipa
-;; https://dohliam.github.io/xsampa/
-;; https://open-dict-data.github.io/ipa-lookup/en/?#
-;; https://bennw.github.io/werdel/#infinite
-
-
-(deftemplate ipa4 (normal shift- alt- alt-shift-)
-  (switch 
-    ((and nop4 nop5)) $alt-shift- break
-    ((and nop5))      $alt- break
-    ((and nop4))      $shift- break
-    ()                $normal break
-  )
-)
-(deflayermap layout-IPA
-  lsft nop4
-  rsft nop4
-  ralt nop5
-  a (t! ipa4 a   🔣ɑ  🔣ʰ  🔣◌̺)
-  b (t! ipa4 b   🔣β  🔣ɓ  🔣ʙ)
-  c (t! ipa4 c   🔣ç  🔣◌̜  🔣◌̹)
-  d (t! ipa4 d   🔣ð  🔣ɖ  🔣◌̪)
-  e (t! ipa4 e   🔣ɛ  🔣ɚ  🔣ɝ)
-  f (t! ipa4 f   🔣ɱ  🔣ɗ  🔣ʄ)
-  g (t! ipa4 g   🔣ɣ  XX   🔣ɢ)
-  h (t! ipa4 h   🔣ɥ  🔣ɦ  🔣ʜ)
-  i (t! ipa4 i   🔣ɪ  XX   🔣ɪ̈)
-  j (t! ipa4 j   🔣ɲ  🔣ʝ  🔣ɟ)
-  k (t! ipa4 k   🔣ɬ  🔣ɭ  🔣ɮ)
-  l (t! ipa4 l   🔣ʎ  🔣ɺ  🔣ʟ)
-  m (t! ipa4 m   🔣ɯ  🔣ⁿ  🔣ɰ)
-  n (t! ipa4 n   🔣ŋ  🔣ɳ  🔣ɴ)
-  o (t! ipa4 o   🔣ɔ  🔣ˡ  🔣ʘ)
-  p (t! ipa4 p   🔣ʋ  🔣ɸ  🔣↘)
-  q (t! ipa4 q   🔣ɒ  🔣ˠ  🔣◌̻)
-  r (t! ipa4 r   🔣ʁ  🔣ɹ  🔣ʀ)
-  s (t! ipa4 s   🔣ʃ  🔣ɕ  🔣ʂ)
-  t (t! ipa4 t   🔣θ  🔣ʈ  🔣↗)
-  u (t! ipa4 u   🔣ʊ  XX   🔣ʊ̈)
-  v (t! ipa4 v   🔣ʌ  XX  XX)
-  w (t! ipa4 w   🔣ʍ  🔣ʷ  🔣◌̼)
-  x (t! ipa4 x   🔣χ  🔣ɧ  🔣ħ)
-  y (t! ipa4 y   🔣ʏ  🔣ɠ  🔣ʛ)
-  z (t! ipa4 z   🔣ʒ  🔣ʑ  🔣ʐ)
-  - (t! ipa4 -   XX   🔣‿  🔣◌̠)
-  , (t! ipa4 ,   🔣<  🔣⟨  🔣ʢ)
-  ; (t! ipa4 ;   🔣ː  🔣◌̆  🔣ˑ)
-  . (t! ipa4 .   XX   XX  🔣ʡ)
-  ' (t! ipa4 '   XX   🔣ʼ  🔣◌̈)
-  [ (t! ipa4 [   XX   🔣◌̝  🔣◌̘)
-  ] (t! ipa4 ]   XX   🔣◌̞  🔣◌̙)
-  / (t! ipa4 /    🔣ʔ 🔣ˤ  🔣ʕ)
-  \ (t! ipa4 🔣|  🔣‖ 🔣ǀ  🔣ǁ)
-  ` (t! ipa4 🔣˞  🔣◌̃ 🔣◌̤  🔣◌̰)
-  = (t! ipa4 🔣◌̩  🔣◌̯ 🔣ǂ  🔣◌̟)
-  0 (t! ipa4 🔣◌̥  XX  🔣◌̬ XX)
-  1 (t! ipa4 XX   🔣ꜜ 🔣ǃ XX)
-  2 (t! ipa4 🔣ø  🔣ə 🔣◌̽  🔣ɘ)
-  3 (t! ipa4 🔣ɜ  🔣◌́ 🔣ɞ  🔣◌̋)
-  4 (t! ipa4 🔣ɾ  🔣◌̄ 🔣ɽ  🔣ɻ)
-  5 (t! ipa4 🔣ɫ  🔣◌̀ 🔣◌̴  🔣◌̏)
-  6 (t! ipa4 🔣ɐ  🔣ꜛ 🔣◌̂  🔣◌̌)
-  7 (t! ipa4 🔣ɤ  🔣æ 🔣◌᷈  🔣ɶ)
-  8 (t! ipa4 🔣ɵ  XX  🔣◌᷅  🔣◌᷄)
-  9 (t! ipa4 🔣œ  XX  🔣◌̚ XX)
-)
-;; https://keymap-drawer.streamlit.app/
-
-(deflayermap layout-cyrillic
-  lsft nop4
-  rsft nop4
-  ralt nop5
-  a (t! ipa4 a   🔣а  🔣А  XX)
-  b (t! ipa4 b   🔣б  🔣Б  XX)
-  c (t! ipa4 c   🔣ц  🔣Ц  XX)
-  d (t! ipa4 d   🔣д  🔣Д  XX)
-  e (t! ipa4 e   🔣е  🔣Е  XX)
-  f (t! ipa4 f   🔣ф  🔣Ф  XX)
-  g (t! ipa4 g   🔣г  🔣Г  XX)
-  h (t! ipa4 h   🔣х  🔣Х  XX)
-  i (t! ipa4 i   🔣и  🔣И  XX)
-  j (t! ipa4 j   🔣й  🔣Й  XX)
-  k (t! ipa4 k   🔣к  🔣К  XX)
-  l (t! ipa4 l   🔣л  🔣Л  XX)
-  m (t! ipa4 m   🔣м  🔣М  XX)
-  n (t! ipa4 n   🔣н  🔣Н  XX)
-  o (t! ipa4 o   🔣о  🔣О  XX)
-  p (t! ipa4 p   🔣п  🔣П  XX)
-  q (t! ipa4 q   🔣я  🔣Я  XX)
-  r (t! ipa4 r   🔣р  🔣Р  XX)
-  s (t! ipa4 s   🔣с  🔣С  XX)
-  t (t! ipa4 t   🔣т  🔣Т  XX)
-  u (t! ipa4 u   🔣у  🔣У  XX)
-  v (t! ipa4 v   🔣в  🔣В  XX)
-  w (t! ipa4 w   🔣щ  🔣Щ  XX)
-  x (t! ipa4 x   🔣х  🔣Х  XX)
-  y (t! ipa4 y   🔣ы  🔣Ы  XX)
-  z (t! ipa4 z   🔣з  🔣З  XX)
+      ;; home row mods
+      a (t! lhrm   $tapping-term        a lctrl  )
+      s (t! lhrm   $tapping-term        s lalt   )
+      d (t! lhrm   $tapping-term        d lsft   )
+      f (t! lhrm   $tapping-term        f lmet   )
+      g (t! lhrm   $tapping-term        g @hyper )
   
+      h (t! rhrm   $tapping-term        h @hyper )
+      j (t! rhrm   $tapping-term        j lmet   )
+      k (t! rhrm   $tapping-term        k rsft   )
+      l (t! rhrm   $tapping-term        l lalt   )
+      ' (t! rhrm   $tapping-term        ' rctl   )
+
+      ;; all the other alfas and def regular typing characters for require-prior-idle-like behavior as suggested by sgraar here (https://www.reddit.com/r/ErgoMechKeyboards/comments/1qosvc0/comment/o7cmdzd/)
+      q (t! nomod q)
+      w (t! nomod w)
+      e (t! nomod e)
+      r (t! nomod r)
+      t (t! nomod t)
+      
+      y (t! nomod y)
+      u (t! nomod u)
+      i (t! nomod i)
+      o (t! nomod o)
+      p (t! nomod p)
+
+      z (t! nomod z)
+      x (t! nomod x)
+      c (t! nomod c)
+      v (t! nomod v)
+      b (t! nomod b)
+
+      n (t! nomod n)
+      m (t! nomod m)
+      , (t! nomod ,)
+      . (t! nomod .)
+      ; (t! nomod ;)
+      spc (t! nomod spc)
+
+      ;; other hold-taps on bottom row of def
+      zfn (t! lhrm   $tapping-term        @z fn     )
+      cnum (tap-hold-release $quick-tap-ms $tapping-term @c (layer-while-held num))
+
+
+
+      ;; one-shot mods for Callum style modding
+      osm (one-shot $one-shot-timeout lmet)
+      oss (one-shot $one-shot-timeout lshift)
+      osa (one-shot $one-shot-timeout lalt)
+      osc (one-shot $one-shot-timeout lctrl)
+      
+      ;; Media tap-dance on NAV
+      ppmnp (tap-dance 200 ((tap-hold $quick-tap-ms $tapping-term pp mute) next prev))
+
+      ;; Layer keys with tri-layer logic, see virtualkey logic below for an explainer on each function
+      tlnav (multi
+        (on-press   press-virtualkey    lnav)
+        (on-press   tap-virtualkey      release_all_mods)
+        (on-press   tap-virtualkey      evaluate_tri_layer)
+        (on-release tap-virtualkey      ops) ;; needed to keep sticky keys alive when returning to default layer
+        (on-release release-virtualkey  lnav)
+        (on-release release-virtualkey  swapperrcmd) ;; kills swapper right command when released (see below)
+        (on-release tap-virtualkey      evaluate_tri_layer)
+        )
+      
+      tlsym (multi
+        (on-press   press-virtualkey    lsym)
+        ;; (on-press   tap-virtualkey      release_all_mods)
+        (on-press   tap-virtualkey      evaluate_tri_layer)
+        (on-release tap-virtualkey      ops) ;; needed to keep sticky keys alive when returning to default layer
+        (on-release release-virtualkey  lsym)
+        (on-release tap-virtualkey      evaluate_tri_layer)
+        )
+      
+      ;; my take on faking urob's tri-state module for Kanata, deactivates on release of tlnav (see above)
+      swapper (multi
+        (on-press   press-virtualkey    swapperrcmd)
+        (on-press   tap-virtualkey      swappertab)
+      )
+      
+      ;; num_word toggle
+      toggle_num_word
+        (switch
+          ((layer def)) (layer-switch num) break
+          ((layer num)) (layer-switch def) break
+        )
+      
+      ;; to let other people use the keyboard without having to learn the layers and combos
+      toggle_muggle_mode 
+        (switch
+          ((layer def)) (layer-switch muggle) break
+          ((layer muggle)) (layer-switch def) break
+        )
+
+      num (layer-while-held num)
+
+      capsword (caps-word-custom-toggle 5000 (a b c d e f g h i j k l m n o p q r s t u v w x y z) (lshift rshift grv apos 6 nop0 nop1 nop9 bspc))
+    
+      ;; num keys
+      0_sym    (tap-hold-release $tapping-term $quick-tap-ms 0 (layer-while-held sym)      )            ;; makes symbols acessible from holding 0 on keypad
+      num_spc  (multi (layer-switch def) spc)                                                           ;; cancels num_word on tap on space
+      num_nav  (tap-hold-release $tapping-term $quick-tap-ms (layer-switch def) (layer-while-held nav)) ;; cancels num_word on tap access nav on hold
+      ;; num typing macrosj
+      r$       (macro S-r S-4 spc)
+      ,00      (macro , Digit0 Digit0 spc)
+      000      (macro Digit0 Digit0 Digit0)
+      
+)
+
+(defchordsv2
+
+  (w e r)   esc                                                                   $combo-timeout all-released  (    nav sym fun     nomods)
+  (w   r)   tab                                                                   $combo-timeout all-released  (    nav sym fun     nomods)
+  (s d f)   enter                                                                 $combo-timeout first-release (    nav sym fun     nomods)   
+  (s   f)   bspc                                                                  $combo-timeout first-release (    nav sym fun     nomods)
+
+  (u i o)   esc                                                                   $combo-timeout all-released  (    nav sym fun     nomods) ;; esc on the right side, great for NUM
+  (u   o)   tab                                                                   $combo-timeout all-released  (    nav sym fun     nomods) ;; tab on the right side, great for NUM
+  (j k l)   enter                                                                 $combo-timeout first-release (    nav sym fun     nomods)  
+  (j   l)   bspc                                                                  $combo-timeout first-release (    nav sym fun     nomods)
+
+
+  (d k)     @capsword                                                             $combo-timeout all-released  (    nav sym fun num       ) ;; caps_word on home row, because why not
+  (m , .)   @toggle_num_word                                                      $combo-timeout all-released  (    nav sym fun     nomods)
+ 
+  (f rmet)  S-grave                                                               $combo-timeout all-released  (    nav sym fun num       ) ;; anachron-combo like ~ makes it posible to type it on caps_word
+  (s rmet)  S-6                                                                   $combo-timeout all-released  (    nav sym fun num       ) ;; anachron-combo like ^ makes it posible to type it on caps_word
+  (d rmet)  S-6                                                                   $combo-timeout all-released  (    nav sym fun num       ) ;; anachron-combo like ` makes it posible to type it on caps_word
+  
+  (g h)     lrld                                                                  $combo-timeout all-released  (def nav sym     num nomods) ;; reloads config from fun
+ 
+  (q w e r) @toggle_muggle_mode                                                   $combo-timeout all-released  (    nav sym fun num       )  
+
+)
+
+(defoverrides
+  (lctrl volu) (🔆) ;; vol + brightness on NAV
+  (lctrl vold) (🔅) ;; vol + brightness on NAV
+)
+
+(defvirtualkeys  
+  to-base (layer-switch def) ;; used in @tap alias to return to base layer on tap after hold-tap-release keys in an attempt to emulate ZMK require-prior-idle behavior
+
+  ops (one-shot-pause-processing 10) ;; allows keeping sticky keys to stay triggerd when moving back to default layer
+
+  swapperrcmd rmet ;; For swapper implementation
+  swappertab tab   ;; sending tab on every new press during swapper activation
+
+  ;; Tri-layer logic
+  lnav nop0 ;; no output keys for tri-layer logic function
+  lsym nop1 ;; no output keys for tri-layer logic function
+  
+  evaluate_tri_layer (switch ;; swtiches the layer based on wich layer keys are pressed
+    ((and nop0 nop1)) (layer-switch fun) break
+    ((and nop0 (not nop1))) (layer-switch nav) break
+    ((and nop1 (not nop0))) (layer-switch sym) break
+    ((not (and nop0 nop1))) (layer-switch def) break
+  )
+
+  release_all_mods nop9 ;; this absorbs all queued one shot mods, cancelling them
+
+)
+
+;; source keys
+(defsrc
+  f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 ;; those need to be here to allow for macOS function keys to process rather than regular function keys
+  q w e r t     y u i o p
+  a s d f g     h j k l ;
+  z x c v b     n m , . /
+       lalt lmet spc rmet
+)
+
+;; keymap
+(deflayer def
+  🔅 🔆 mctl sls dtn dnd ◀◀ ▶⏸ ▶▶ 🔇 🔉 🔊
+ @q   @w @e    @r  @t        @y  @u  @i  @o  @p
+ @a   @s @d    @f  @g        @h  @j  @k  @l  @' 
+ @zfn @x @cnum @v  @b        @n  @m  @,  @.  @;
+        @num @tlnav   @spc  @tlsym
+)
+
+(deflayer nomods ;; temporarily switch to a layer with no hold-taps to emulate ZMK require-prior-idle setting on home row mods definition
+  🔅 🔆 mctl sls dtn dnd ◀◀ ▶⏸ ▶▶ 🔇 🔉 🔊
+  q  w  e  r  t     y  u  i  o  p
+  a  s @d  f  g     h  j @k  l  '  ;; shift has got to be a home row mod to allow capitalization even when typing fast
+  z  x  c  v  b     n  m  ,  .  ;
+           _  _  _  _
+)
+
+(deflayer num
+  f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12
+  A-9   A-0   XX    @r$   A-6            S-= 7 8 9 S-8
+  @osc  @osa  @oss  @osm  bspc           -   4 5 6 /
+  XX    @oss  XX    @000  @,00           ,   1 2 3 .
+                    _  @num_nav @num_spc @0_sym
+)
+
+(deflayer nav
+  f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12
+  tab   @swapper S-C-tab C-tab  M-rbrc    pgup   home  up    end   bspc
+  @osc  @osa     @oss    @osm   M-lbrc    pgdn   left  down  right enter
+  M-z   M-x      M-c     M-v    f18       @ppmnp f19   vold  volu  del  
+                              _ _      _  _ 
+)
+
+(deflayer sym
+  f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12
+  esc S-lbrc lbrc S-9   S-5     S-7   S-0   rbrc  S-rbrc  S-'
+  -   S-6    grv  S-grv S-4     S-3   @osm  @oss  @osa    @osc
+  S-= =      S-8  ⁄     S-2     S-＼  ＼     S-⁄   S-1     S-;
+                        _ _   S-- _ 
+)
+
+(deflayer fun
+  f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12
+  1     2     3    4    5       6   7    8    9    0
+  @osc  @osa  @oss @osm f11     f12 @osm @oss @osa @osc
+  f1    f2    f3   f4   f5      f6  f7   f8   f9   f10 
+                        _ _ caps _  
+)
+
+(deflayer muggle ;; for muggle people to use the keyboard as if it were no remaps
+  🔅 🔆 mctl sls dtn dnd ◀◀ ▶⏸ ▶▶ 🔇 🔉 🔊 ;; to do, allow for fn + key to trigger the corresponding f key
+  q w e r t     y u i o p
+  a s d f g     h j k l ;
+  z x c v b     n m , . /
+       lalt lmet spc rmet 
 )
