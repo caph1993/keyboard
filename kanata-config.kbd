@@ -88,10 +88,8 @@
       spc (t! nomod spc)
 
       ;; other hold-taps on bottom row of def
-      zfn (t! lhrm   $tapping-term        @z fn     )
+      zfn (t! lhrm   $tapping-term        @z nop0     )
       cnum (tap-hold-release $quick-tap-ms $tapping-term @c (layer-while-held num))
-
-
 
       ;; one-shot mods for Callum style modding
       osm (one-shot $one-shot-timeout lmet)
