@@ -4,15 +4,20 @@
 This keyboard layout is very opinionated
 
 My pinkies stand on `tab` and `[`, and the rest of my fingers on `w` `e` `f` and `j` `i` `o`, hence the name wefjio.
+- [relevant discussion](https://www.reddit.com/r/Colemak/comments/qifv18/idea_about_a_new_layout/)
+- [very relevant](https://forum.colemak.com/topic/541-is-there-a-better-optimisation-for-a-flat-keyboard/)
 
 
 ## Objectives
 
- - Use home row mods. To handle misfires, use timeless trick, but allow for same hand modifiers if the waiting time is long enough.
+ [x] Use home row mods. To handle misfires, use timeless trick, but allow for same hand modifiers if the waiting time is long enough.
 
- - Improve the symbols, so that programming feels natural and comfortable.
+ [x] Improve right handed only navigation
+  
+ [ ] Improve number and symbols, so that programming feels natural and comfortable.
 
- - Improve the layer locking system
+ [x] Improve the layer locking system
+
 
 
 ## Collection of resources and ideas

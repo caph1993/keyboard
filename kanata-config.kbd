@@ -201,15 +201,16 @@
   unlock      (on-press press-vkey unlock)
   lock-arrows (on-press press-vkey lock-arrows)
   lock-mouse  (on-press press-vkey lock-mouse)
+  lock-num    (on-press press-vkey lock-num)
 )
 (defalias esc  (multi esc @L0 @unlock )) ;; tap esc to exit custom layouts
 
 (defvirtualkeys
-  L1 (layer-while-held layout-IPA)
-  L2 (layer-while-held layout-cyrillic)
-  lock-arrows (layer-while-held arrows)
+  L1          (layer-while-held layout-IPA)
+  L2          (layer-while-held layout-cyrillic)
+  lock-arrows (layer-while-held arrows-right)
   lock-mouse  (layer-while-held mouse)
-  ;; L3 (layer-while-held layout-emoji)
+  lock-num    (layer-while-held num)
 )
 (defvirtualkeys
   L0 (multi
@@ -219,17 +220,22 @@
   unlock (multi
     (on-press release-vkey lock-arrows)
     (on-press release-vkey lock-mouse)
+    (on-press release-vkey lock-num)
   )
 )
 
 (defalias
   arrows (multi
-    (layer-while-held arrows)
-    (fork XX (on-press press-vkey lock-arrows) (nop2))
+    (multi (layer-while-held arrows-left) (layer-while-held arrows-right))
+    (fork @unlock (on-press press-vkey lock-arrows) (nop2))
   )
   mouse  (multi
     (layer-while-held mouse)
-    (fork XX (on-press press-vkey lock-mouse) (nop2))
+    (fork @unlock (on-press press-vkey lock-mouse) (nop2))
+  )
+  num  (multi
+    (layer-while-held num)
+    (fork @unlock (on-press press-vkey lock-num) (nop2))
   )
 )
 
@@ -238,17 +244,54 @@
   (fork XX @mouse (ralt nop1))
 ))
 (defalias num-FKeys (multi
-  (layer-while-held num)
+  @num
   (fork XX (layer-while-held FKeys) (ralt nop1)))
 )
 
-(deflayer arrows
-  _   _     _    _   _    _   _    _   _     _  _    _      _      _   @del
-  _     _     _     _    _    _     _    _   _   @←←  @→→    _   _  @bspc
-  _       =    @'*   @[*  ]    _   C-y @bspc @↑   @→   @C→  _   XX    @*TeX
-  _         -    \    /    @⊂  @⊃ @C← @←    @↓   @del  XX XX            _ 
-  _          C-z  C-x  C-c  C-v XX @btn1 @btn2 @*IPA _   _            _
-  _           _  _  (tap-hold 200 200 spc lsft) nop1 _    _   _   _   _
+
+(defchords chord-arrows-i $chord-timeout
+  (j) @←
+  (i) (tap-dance-eager 200 ((tap-hold 200 200 @↑ rctl) @↑))
+  (k) (tap-dance-eager 200 ((tap-hold 200 200 @↓ rctl) @↓))
+  (o) @→
+  (u) @bspc
+  (l) @del
+
+  (j o) ret
+  
+  (i j) @C←
+  (i o) @C→
+  (i u) @Cbspc
+  (i l) @Cdel
+  (k j) @C←
+  (k o) @C→
+  (k u) @Cbspc
+  (k l) @Cdel
+  
+)
+
+(deflayermap arrows-left
+  q =    w @'*  e @[*  r ]
+  a -    s \    d /    f @⊂  g @⊃ 
+  z C-z  x C-x  c C-c  v C-v
+)
+(deflayermap arrows-right
+  y C-y
+  u (chord chord-arrows-i u)
+  i (chord chord-arrows-i i)
+  o (chord chord-arrows-i o)
+  j (chord chord-arrows-i j)
+  k (chord chord-arrows-i k)
+  l (chord chord-arrows-i l)
+  
+  p @C→
+  [ @unlock
+  ] XX
+  \ @*TeX
+  h  @C←  ; XX    ' XX
+  n @btn1 m @btn2 , @*IPA
+  spc (tap-hold 200 200 spc @lock-arrows)
+  ralt nop1
 )
 
 (deflayermap mouse
@@ -259,7 +302,7 @@
   u XX
   lalt nop2 ;; slow movements
   rctl nop2 ;; slow movements
-  spc (tap-hold 200 200 spc (layer-while-held mouse))
+  spc (tap-hold 200 200 spc @lock-mouse)
 )
 
 (deflayermap num
@@ -275,7 +318,7 @@
   p (t! home-row-mod 0 ralt)
   m '  k [  l ]  ; \
   a \  s `  d -  v =
-  spc (tap-hold 200 200 spc (layer-while-held num))
+  spc (tap-hold 200 200 spc @lock-num)
 )
 (deflayermap FKeys
   q (t! home-row-mod (fork F1  @fn-F1  (nop1)) lmet)
@@ -412,18 +455,18 @@
 (defvirtualkeys sldr-off (on-press release-vkey sldr-on))
 (defalias *sldr (multi
   (on-press press-vkey sldr-on)
-  (on-idle 1 tap-vkey sldr-off)
+  (on-idle 200 tap-vkey sldr-off)
 ))
 
 ;; nop0 is the "go to extreme" button <=>l
 ;; nop3 is a "ctl" button. All ctl buttons trigger nop3, except the tab key for which certain keys are unmoded.
 ;; Repeated arrow means ctrl+arrow (word jump). Only defined for left and right.
-(defalias ←    left)
 (defalias ↑    (fork up   @☸↑ (nop1)))
 (defalias ↓    (fork down @☸↓ (nop1)))
-(defalias →    right)
-(defalias C←   (tap-hold 200 300 C-left (macro home)))
-(defalias C→   (tap-hold 200 300 C-right (macro end)))
+(defalias ←    (fork left S-left (nop1)))
+(defalias →    (fork right S-right (nop1)))
+(defalias C←   (fork (tap-hold 200 300 C-left (macro home)) (tap-hold 200 300 S-C-left (macro S-home)) (nop1)))
+(defalias C→   (fork (tap-hold 200 300 C-right (macro end)) (tap-hold 200 300 S-C-right (macro S-end)) (nop1)))
 (defalias ←←   (fork home pgup (nop1)))
 (defalias →→   (fork end  pgdn (nop1)))
 
@@ -433,8 +476,10 @@
 (defalias btn1 (fork ret   🖰1   (nop1)))
 (defalias btn2 (fork @*TeX 🖰2   (nop1)))
 (defalias btn3 (fork ContextMenu   🖰3   (nop1)))
-(defalias bspc (tap-hold 200 600 bspc (macro S-home (unmod bspc))))
-(defalias del  (tap-hold 200 600 del  (macro S-end  (unmod del ))))
+(defalias bspc  (tap-hold 200 600 bspc   (macro S-home (unmod bspc))))
+(defalias Cbspc (tap-hold 200 600 C-bspc (macro S-home (unmod bspc))))
+(defalias del   (tap-hold 200 600 del    (macro S-end  (unmod del ))))
+(defalias Cdel  (tap-hold 200 600 C-del  (macro S-end  (unmod del ))))
 
 ;; Either there is a bug of a hardware issue when pressing multiple keys (holding three and pressing the fourh): (` = ralt o) works and (` = ralt j) works, but (` = ralt i) and (` = ralt j) don't. The software doesn't detect it at all.
 
@@ -677,6 +722,29 @@
 (t! def-seq 2/            (\ 2 /                       spc) (macro 🔣² 🔣⁄))
 (t! def-seq _123          (\ S-- 1 2 3                 spc) (macro 🔣₁ 🔣₂ 🔣₃ 🔣₄ 🔣₅ 🔣₆ 🔣₇ 🔣₈ 🔣₉ 🔣₀))
 (t! def-seq ^123          (\ S-6 1 2 3                 spc) (macro 🔣¹ 🔣² 🔣³ 🔣⁴ 🔣⁵ 🔣⁶ 🔣⁷ 🔣⁸ 🔣⁹ 🔣⁰))
+
+;; Reachable keys
+(t! def-seq \minus        (\ m i n u s                 spc) -)
+(t! def-seq \minus-S      (\ m i n u s               S-spc) S--)
+(t! def-seq \underscore   (\ u n d e r s c o r e       spc) S--)
+(t! def-seq \eq           (\ e q                       spc) =)
+(t! def-seq \eq-S         (\ e q                     S-spc) S-=)
+(t! def-seq \plus         (\ p l u s                   spc) S-=)
+(t! def-seq \and          (\ a n d                     spc) S-7)
+(t! def-seq \and-S        (\ a n d                   S-spc) (macro S-7 S-7))
+(t! def-seq \or           (\ o r                       spc) S-\)
+(t! def-seq \or-S         (\ o r                     S-spc) (macro S-\ S-\))
+
+
+(t! def-seq \mute         (\ m u t e                   spc) mute)
+(t! def-seq \unmute       (\ u n m u t e               spc) mute)
+(t! def-seq \next         (\ n e x t                   spc) next)
+(t! def-seq \prev         (\ p r e v                   spc) prev)
+
+
+(t! def-seq \schwa        (\ s c h w a                 spc) (unicode ə))
+
+
 
 (t! def-seq ~:            (S-` S-;                     spc) (unicode ː))
 (t! def-seq ~'            (S-` '                       spc) (unicode ˈ))
