@@ -5,6 +5,7 @@
   sequence-input-mode visible-backspaced ;; shows the sequence as it is typed
   ;; sequence-input-mode hidden-delay-type ;; hides while typing. Outputs if invalid
   sequence-timeout 8000 ;; 8 seconds maximum between key presses in sldr sequence
+  log-layer-changes no        ;; no logging
 )
 
 ;; My natural right hand position when typing text is the following:
