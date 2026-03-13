@@ -5,6 +5,9 @@
   sequence-input-mode visible-backspaced ;; shows the sequence as it is typed
   ;; sequence-input-mode hidden-delay-type ;; hides while typing. Outputs if invalid
   sequence-timeout 8000 ;; 8 seconds maximum between key presses in sldr sequence
+  log-layer-changes no        ;; no logging
+  chords-v2-min-idle 5      ;; same as require-prior-idle from ZMK but only for for combos
+  concurrent-tap-hold yes
 )
 
 ;; My natural right hand position when typing text is the following:
@@ -110,27 +113,13 @@
 ;;   d (t! type d)
 ;; )
 (defvar
-  chord-timeout 50
+  chord-timeout 60
 )
-(defchords chord-sd-tab $chord-timeout
-  (s  ) (t! type s)
-  (  d) (t! type d)
-  (s d) tab
-)
-(defchords chord-kl-ret $chord-timeout
-  (k  ) (t! type k)
-  (  l) (t! type l)
-  (k l) ret
-)
-(defchords chord-90-bspc $chord-timeout
-  (9  ) (t! type 9)
-  (  0) (t! type 0)
-  (9 0) (fork bspc (macro S-9 S-0) (sft))
-)
-(defchords chord-23-esc $chord-timeout
-  (2  ) (t! type 2)
-  (  3) (t! type 3)
-  (2 3) @esc
+(defchordsv2
+  (s d) tab $chord-timeout all-released ()
+  (k l) ret $chord-timeout all-released ()
+  (2 3) esc $chord-timeout all-released ()
+  (9 0) (fork bspc (macro S-9 S-0) (sft)) $chord-timeout all-released ()
 )
 
 (deflayermap (base)
@@ -138,10 +127,10 @@
   esc @esc
 
   ;; Row of numbers
-  2    (chord chord-23-esc 2)
-  3    (chord chord-23-esc 3)
-  9    (chord chord-90-bspc 9)
-  0    (chord chord-90-bspc 0)
+  2    (t! type 2)
+  3    (t! type 3)
+  9    (t! type 9)
+  0    (t! type 0)
 
   ;; Row of qwe
   tab  (t! home-row-mod tab   @arrows-mouse)
@@ -161,14 +150,14 @@
   ;; Row of asd
   caps (tap-hold 100 100 caps @num-FKeys)
   a    (t! type a)
-  s    (chord chord-sd-tab s)
-  d    (chord chord-sd-tab d)
+  s    (t! type s)
+  d    (t! type d)
   f    (t! home-row-mod f    lsft)
   g    (t! type g)
   h    (t! type h)
   j    (t! home-row-mod j    rsft)
-  k    (chord chord-kl-ret k)
-  l    (chord chord-kl-ret l)
+  k    (t! type k)
+  l    (t! type l)
   ;    (t! type ;)
   '    (t! home-row-mod '    @num-FKeys)
   
