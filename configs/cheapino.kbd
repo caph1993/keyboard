@@ -1,27 +1,194 @@
 ;; Run with:
 ;; kanata --cfg cheapino.kbd --symlink-path /dev/input/by-id/usb-Thomas_Haukland_Cheapino2_vial:f64c2b3c-event-kbd
 (defcfg
-  ;; linux-dev /dev/input/by-id/usb-Thomas_Haukland_Cheapino2_vial:f64c2b3c-event-kbd
   linux-dev-names-include (
     "Thomas Haukland Cheapino2 Keyboard"
   )
   linux-continue-if-no-devs-found yes
   process-unmapped-keys yes
 
+  danger-enable-cmd yes
+  movemouse-inherit-accel-state yes
+  movemouse-smooth-diagonals yes
+  sequence-input-mode visible-backspaced ;; shows the sequence as it is typed
+  ;; sequence-input-mode hidden-delay-type ;; hides while typing. Outputs if invalid
+  sequence-timeout 8000 ;; 8 seconds maximum between key presses in sldr sequence
   log-layer-changes no        ;; no logging
 )
 
 
 (defsrc
-  q w e r t y u i o p
-  a s d f g h j k l ;
-  z x c v b n m , . /
+  q w e r t   y u i o p
+  a s d f g   h j k l ;
+  z x c v b   n m , . /
   esc spc tab
   del ret bspc
 )
-(deflayermap base q 0)
+
+(defvar
+  ;; timings in ms using ZMK-like names
+  one-shot-timeout 60000                 ;; 60 seconds. Bonkers, I know…
+  tapping-term 300                       ;; A higher number allows for one handed modded keys reducing the chance of false-positives when typing fast
+  quick-tap-ms 200                       ;; same as ZMK ($tap-repress-timeout in Kanata docs)
+  require-prior-idle 55                 ;; same as ZMK (not used in vanilla kanata, but used as a workaround in this confit)  
+  combo-timeout 60                       ;; same as ZMK
+  
+  ;; keys for tap-hold-release-tap-keys-release templates
+  left-side-keys   (r t s d g z x c v b) ;; these keys will always make the precedent same hand tap-hold-release-tap-keys-release output tap. B is missing because I, sometimes, alt finger it
+  right-side-keys  (y u k l ; m n , .) ;; these keys will always make the precedent same hand tap-hold-release-tap-keys-release output tap
+  home-row-left-keys  (q w e a f)      ;; home row mods - these will output a tap if they're released after the first key
+  home-row-right-keys (j i o p ')        ;; home row mods - these will output a tap if they're released after the first key
+)
+
+;; home row mods templates mimicking urob's timerless home row mods implementation
+(deftemplate nomod (tap-key)
+  (multi $tap-key @tap)
+)
+(defalias
+  ;; quasi-zmk's 'require-prior-idle' behavior
+  tap (multi                                             
+    (layer-switch nomods)                                ;; temporarily switches to a layer with no home row mods enabled
+    (on-idle $require-prior-idle tap-virtualkey to-base) ;; when $require-prior-idle expires, uses the fake key to return to base layer (see )
+  )
+)
+(defvirtualkeys  
+  to-base (layer-switch base)
+)
 
 
+;; home row mods templates mimicking urob's timeless home row mods implementation
+(deftemplate lhrm (tappingterm tap-key hold-key)  ;; left hand mods
+  (tap-hold-release-tap-keys-release $quick-tap-ms $tappingterm
+    (t! nomod $tap-key)
+    $hold-key
+    $left-side-keys $home-row-left-keys
+  )
+)
+
+(deftemplate rhrm (tappingterm tap-key hold-key)  ;; right hand mods
+  (tap-hold-release-tap-keys-release $quick-tap-ms $tappingterm
+    (t! nomod $tap-key)
+    $hold-key
+    $right-side-keys $home-row-right-keys
+  )
+)
+
+(deftemplate hrm (tappingterm tap-key hold-key)  ;; mod ignoring hands
+  (tap-hold $quick-tap-ms $tappingterm
+    (t! nomod $tap-key)
+    $hold-key
+  )
+)
+
+;; https://github.com/jtroo/kanata/discussions/1656#discussioncomment-14382030
+(defvirtualkeys fast_typing_state XX)
+(defvar
+  tot 220  ;; time out tap
+)
+(deftemplate type (action)
+  (multi
+    (fork
+       (hold-for-duration 55 fast_typing_state)
+      XX
+      (lctl rctl lalt ralt lmet rmet)
+    )
+    $action
+  )
+)
+(deftemplate home-row-mod- (timeouttap timeouthold keytap keyhold)
+  (switch
+    ((input virtual fast_typing_state)) (t! type $keytap) break
+    () (tap-hold $timeouttap $timeouthold
+         (t! type $keytap)
+         $keyhold
+       ) break
+  )
+)
+(deftemplate home-row-mod (keytap keyhold)
+  (t! home-row-mod- $tot 220 $keytap $keyhold)
+)
+
+(defvar
+  chord-timeout 50
+)
+;; (defchords chord-sd-tab $chord-timeout
+;;   (s  ) (t! type s)
+;;   (  d) (t! type d)
+;;   (s d) tab
+;; )
+;; (defchords chord-kl-ret $chord-timeout
+;;   (k  ) (t! type k)
+;;   (  l) (t! type l)
+;;   (k l) ret
+;; )
+;; (defchords chord-90-bspc $chord-timeout
+;;   (9  ) (t! type 9)
+;;   (  0) (t! type 0)
+;;   (9 0) (fork bspc (macro S-9 S-0) (sft))
+;; )
+;; (defchords chord-23-esc $chord-timeout
+;;   (2  ) (t! type 2)
+;;   (  3) (t! type 3)
+;;   (2 3) @esc
+;; )
+
+(deflayermap (base)
+  ;; Row of qwe
+
+  q    (t! nomod q)
+  w    (t! nomod w)
+  e    (t! nomod e)
+  r    (t! nomod r)
+  ;; s    (chord chord-sd-tab s)
+  ;; d    (chord chord-sd-tab d)
+  t    (t! nomod t)
+
+  y    (t! nomod y)
+  u    (t! nomod u)
+  i    (t! nomod i)
+  o    (t! nomod o)
+  p    (t! nomod p)
+
+  ;; Row of asd
+  a    (t!  hrm   $tapping-term   a   @arrows-mouse)
+  s    (t! lhrm   $tapping-term   s    lalt)
+  d    (t! lhrm   $tapping-term   d    lctl)
+  f    (t! lhrm   $tapping-term   f    lsft)
+  g    (t! nomod g)
+  
+  h    (t! nomod h)
+  j    (t! rhrm   $tapping-term   j    rsft)
+  k    (t! rhrm   $tapping-term   k    rctl)
+  l    (t! rhrm   $tapping-term   l    lalt)
+  ;    (t! hrm    $tapping-term   ;     @arrows-mouse)
+  
+  ;; Row of z
+  z    (t! nomod z)
+  x    (t! nomod x)
+  c    (t! lhrm   $tapping-term   c    ralt)
+  v    (t! nomod v)
+  b    (t! nomod b) 
+  n    (t! nomod n)
+  m    (t! rhrm   $tapping-term   m    ralt)
+  ,    (t! nomod ,)
+  .    (t! nomod .)
+  /    (t! nomod /)
+
+
+  ;; F1   (tap-hold 200 600 F1  @L1)
+  ;; F12  (tap-hold 200 600 F12 lrld)
+
+  spc  (tap-hold 200 200 spc nop2) ;; nop2=layer-lock
+
+  ;; row of space
+  ;; ralt (multi ralt nop1)
+  ;; left @← up @↑ down @↓ right @→
+)
+
+(deflayermap (nomods))
+
+(defalias arrows-mouse nop0)
+(defalias num-FKeys nop0)
 
 
 
