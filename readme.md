@@ -20,6 +20,12 @@ My pinkies stand on `tab` and `[`, and the rest of my fingers on `w` `e` `f` and
 
 
 
+At this point, and with a Systemd service unit named kanata@.service with:
+```
+ExecStart=kanata --cfg /home/carlos/keyboard/config/%i.kbd  --symlink-path /dev/input/by-id/kanata_%i
+```
+
+
 ## Collection of resources and ideas
 
 - I find home row mods vital.

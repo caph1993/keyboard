@@ -1,0 +1,29 @@
+;; Run with:
+;; kanata --cfg cheapino.kbd --symlink-path /dev/input/by-id/usb-Thomas_Haukland_Cheapino2_vial:f64c2b3c-event-kbd
+(defcfg
+  ;; linux-dev /dev/input/by-id/usb-Thomas_Haukland_Cheapino2_vial:f64c2b3c-event-kbd
+  linux-dev-names-include (
+    "Thomas Haukland Cheapino2 Keyboard"
+  )
+  linux-continue-if-no-devs-found yes
+  process-unmapped-keys yes
+
+  log-layer-changes no        ;; no logging
+)
+
+
+(defsrc
+  q w e r t y u i o p
+  a s d f g h j k l ;
+  z x c v b n m , . /
+  esc spc tab
+  del ret bspc
+)
+(deflayermap base q 0)
+
+
+
+
+
+
+
