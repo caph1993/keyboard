@@ -252,6 +252,8 @@ linux-dev-names-exclude (
   left @← up @↑ down @↓ right @→
 )
 
+(deflayermap nomods)
+
 (defalias
   L0 (on-press press-vkey L0)
   L1 (on-press press-vkey L1)
@@ -446,6 +448,10 @@ linux-dev-names-exclude (
 ;; Tip. Use: (multi (layer-while-held disabled) (layer-while-held some-layer)) to block all keys but those defined in some-layer
 
 
+(include "configs/sldr.kbd")
+(defalias *TeX (multi @*sldr (macro (unicode *) 150 bspc sldr 5 \)))
+(defalias *IPA (multi @*sldr (macro (unicode *) 150 bspc sldr 5 S-`)))
+
 
 ;; ----------------------------------------------------------
 ;; Tab and arrows layer
@@ -475,7 +481,3 @@ linux-dev-names-exclude (
 ;; ----------------------------------------------------------
 ;; Custom layouts and sldr commands (mostly TeX)
 ;; ----------------------------------------------------------
-
-(include "configs/sldr.kbd")
-(defalias *TeX (multi @*sldr (macro (unicode *) 150 bspc sldr 5 \)))
-(defalias *IPA (multi @*sldr (macro (unicode *) 150 bspc sldr 5 S-`)))

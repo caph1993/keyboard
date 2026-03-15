@@ -204,14 +204,30 @@
   (fork XX (layer-while-held FKeys) (ralt nop1)))
 )
 
+
+
+
+(defchords chord-arrows-k $chord-timeout
+  (j) @←
+  (k) (fork (tap-dance-eager 200 ((tap-hold 200 200 @↑ rctl) @↑)) @↑ (nop1))
+  (,) (fork (tap-dance-eager 200 ((tap-hold 200 200 @↓ rctl) @↓)) @↓ (nop1))
+  (l) @→
+  (u) @bspc
+  (.) @del
+
+  (k j) @C←
+  (k l) @C→
+  (k u) @Cbspc
+  (k .) @Cdel
+)
 (deflayermap arrows-right
   y C-y
-  j @←
-  k (fork (tap-dance-eager 200 ((tap-hold 200 200 @↑ rctl) @↑)) @↑ (nop1))
-  , (fork (tap-dance-eager 200 ((tap-hold 200 200 @↓ rctl) @↓)) @↓ (nop1))
-  l @→
-  u @bspc
-  . @del
+  j (chord chord-arrows-k j)
+  k (chord chord-arrows-k k)
+  , (chord chord-arrows-k ,)
+  l (chord chord-arrows-k l)
+  u (chord chord-arrows-k u)
+  . (chord chord-arrows-k .)
 
   n @btn1 m @btn2
   spc (tap-hold 200 200 spc sft)
