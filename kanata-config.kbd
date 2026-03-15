@@ -198,6 +198,11 @@
   (  3) (t! nomod 3)
   (2 3) @esc
 )
+(defchords chord-[spc-nav $chord-timeout
+  ([  )   (t! hrm    $tapping-term   [     (multi nop1 (layer-while-held disabled) (layer-while-held spc-arrows)))
+  (  spc) (t! hrm      $tapping-term   spc @arrows-mouse)
+  ([ spc) @mouse 
+)
 
 (deflayermap (base)
   ;; Row of F keys
@@ -223,7 +228,7 @@
   o    (t! rhrm   $tapping-term   o    lalt)
   p    (t! rhrm   $tapping-term   p    ralt)
   ;; p    (t! rhrm- $tot 350 p    lmet)
-  [    (t! hrm    $tapping-term   [     (multi nop1 (layer-while-held disabled) (layer-while-held spc-arrows)))
+  [    (chord chord-[spc-nav [)
   ]    (t! nomod ])
 
   ;; Row of asd
@@ -259,7 +264,7 @@
   ;; spc  (tap-hold 200 200 spc nop2) ;; nop2=layer-lock
 
   ;; row of space
-  spc (t! hrm      $tapping-term   spc @arrows-mouse)
+  spc  (chord chord-[spc-nav spc)
   left @← up @↑ down @↓ right @→
 )
 (deflayermap spc-arrows
@@ -315,7 +320,7 @@
 ))
 (defalias num-FKeys (multi
   @num
-  (fork XX (layer-while-held FKeys) (nop1)))
+  (fork XX (layer-while-held FKeys) (lalt)))
 )
 
 
@@ -376,7 +381,6 @@
   \ @*TeX
   n @btn1 m @btn2 , @*IPA
   spc (tap-hold 200 200 spc sft)
-  ralt nop1
 )
 
 (deflayermap mouse
@@ -384,8 +388,8 @@
   n 🖰1    m 🖰2
   x C-x   z C-z  c C-c    v C-v    y C-y
   u XX
-  [ XX
-  ] XX  
+  [ nop1
+  ] XX
   lalt nop2 ;; slow movements
   rctl nop2 ;; slow movements
 )
