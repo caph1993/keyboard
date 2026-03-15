@@ -1,7 +1,8 @@
 (defcfg
-linux-dev-names-exclude (
+  linux-dev-names-exclude (
     "Thomas Haukland Cheapino2 Keyboard"
   )
+  linux-continue-if-no-devs-found yes
   danger-enable-cmd yes
   movemouse-inherit-accel-state yes
   movemouse-smooth-diagonals yes

@@ -21,7 +21,7 @@
   q w e r t   y u i o p
   a s d f g   h j k l ;
   z x c v b   n m , . /
-  esc spc tab
+  lalt spc esc
   ralt ret bspc
 )
 
@@ -219,6 +219,8 @@
   (k l) @C→
   (k u) @Cbspc
   (k .) @Cdel
+
+  (j k l) lrld
 )
 (deflayermap arrows-right
   y C-y
@@ -228,14 +230,18 @@
   l (chord chord-arrows-k l)
   u (chord chord-arrows-k u)
   . (chord chord-arrows-k .)
-
-  n @btn1 m @btn2
+  
+  p esc
+  h tab
+  n XX
+  m (fork ret   🖰1   (nop1))
   spc (tap-hold 200 200 spc sft)
   ralt nop1
 )
 (deflayermap mouse
   j @🖱←   k @🖱↑  , @🖱↓   l @🖱→
-  n 🖰1    m 🖰2
+  m 🖰1
+  h 🖰2
   x C-x   z C-z  c C-c    v C-v    y C-y
   u XX
   ] XX  
@@ -251,8 +257,6 @@
 (defalias →    (fork right end (nop1)))
 (defalias C←   (fork (tap-hold 200 300 C-left (macro home)) home (nop1)))
 (defalias C→   (fork (tap-hold 200 300 C-right (macro end)) end (nop1)))
-(defalias btn1 (fork ret   🖰1   (nop1)))
-(defalias btn2 (fork XX 🖰2   (nop1)))
 (defalias btn3 (fork ContextMenu   🖰3   (nop1)))
 (defalias bspc  (tap-hold 200 600 bspc   (macro (unmod lsft home) (unmod bspc))))
 (defalias Cbspc (tap-hold 200 600 C-bspc (macro (unmod lsft home) (unmod bspc))))
