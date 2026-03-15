@@ -14,12 +14,10 @@ My pinkies stand on `tab` and `[`, and the rest of my fingers on `w` `e` `f` and
 
  [x] Improve right handed only navigation
  [x] Improve the layer locking system
+ [x] Switch entirely to hrm or fast_typing_state
+ [x] Switch ralt thumb and [ pinkie for the arrows layer. Put ralt somewhere else.
 
- [ ] Switch entirely to hrm or fast_typing_state
-
- [ ] Switch ralt thumb and [ pinkie for the arrows layer. Put ralt somewhere else.
-
- [ ] Improve number and symbols, so that programming feels natural and comfortable.
+ [ ] Practice number and symbols, so that programming feels natural and comfortable.
 
  [ ] Use the pre-optimized symbols layer on the cheapino.
 
