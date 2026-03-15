@@ -66,17 +66,71 @@
 ;; )
 
 
-;; https://github.com/jtroo/kanata/discussions/1656#discussioncomment-14382030
-(defvirtualkeys
-  fasttypingstate XX
+
+(defvar
+  ;; timings in ms using ZMK-like names
+  one-shot-timeout 60000                 ;; 60 seconds. Bonkers, I know…
+  tapping-term 300                       ;; A higher number allows for one handed modded keys reducing the chance of false-positives when typing fast
+  quick-tap-ms 200                       ;; same as ZMK ($tap-repress-timeout in Kanata docs)
+  require-prior-idle 55                 ;; same as ZMK (not used in vanilla kanata, but used as a workaround in this confit)  
+  combo-timeout 60                       ;; same as ZMK
+  
+  ;; keys for tap-hold-release-tap-keys-release templates
+  left-side-keys   (r t s d g z x c v b) ;; these keys will always make the precedent same hand tap-hold-release-tap-keys-release output tap. B is missing because I, sometimes, alt finger it
+  right-side-keys  (y u k l ; m n , .) ;; these keys will always make the precedent same hand tap-hold-release-tap-keys-release output tap
+  home-row-left-keys  (q w e a f)      ;; home row mods - these will output a tap if they're released after the first key
+  home-row-right-keys (j i o p ')        ;; home row mods - these will output a tap if they're released after the first key
 )
+
+;; home row mods templates mimicking urob's timerless home row mods implementation
+(deftemplate nomod (tap-key)
+  (multi $tap-key @tap)
+)
+(defalias
+  ;; quasi-zmk's 'require-prior-idle' behavior
+  tap (multi                                             
+    (layer-switch nomods)                                ;; temporarily switches to a layer with no home row mods enabled
+    (on-idle $require-prior-idle tap-virtualkey to-base) ;; when $require-prior-idle expires, uses the fake key to return to base layer (see )
+  )
+)
+(defvirtualkeys  
+  to-base (layer-switch base)
+)
+
+
+;; home row mods templates mimicking urob's timeless home row mods implementation
+(deftemplate lhrm (tappingterm tap-key hold-key)  ;; left hand mods
+  (tap-hold-release-tap-keys-release $quick-tap-ms $tappingterm
+    (t! nomod $tap-key)
+    $hold-key
+    $left-side-keys $home-row-left-keys
+  )
+)
+
+(deftemplate rhrm (tappingterm tap-key hold-key)  ;; right hand mods
+  (tap-hold-release-tap-keys-release $quick-tap-ms $tappingterm
+    (t! nomod $tap-key)
+    $hold-key
+    $right-side-keys $home-row-right-keys
+  )
+)
+
+(deftemplate hrm (tappingterm tap-key hold-key)  ;; mod ignoring hands
+  (tap-hold $quick-tap-ms $tappingterm
+    (t! nomod $tap-key)
+    $hold-key
+  )
+)
+
+;; https://github.com/jtroo/kanata/discussions/1656#discussioncomment-14382030
+(defvirtualkeys fast_typing_state XX)
 (defvar
   tot 220  ;; time out tap
 )
 (deftemplate type (action)
   (multi
     (fork
-       (hold-for-duration 55 fasttypingstate)
+       (hold-for-duration 55 fast_typing_state)
       XX
       (lctl rctl lalt ralt lmet rmet)
     )
@@ -85,7 +139,7 @@
 )
 (deftemplate home-row-mod- (timeouttap timeouthold keytap keyhold)
   (switch
-    ((input virtual fasttypingstate)) (t! type $keytap) break
+    ((input virtual fast_typing_state)) (t! type $keytap) break
     () (tap-hold $timeouttap $timeouthold
          (t! type $keytap)
          $keyhold
@@ -105,13 +159,12 @@
   lctl   lmet lalt          spc             ralt rctl left up down right
 )
 
-
 ;; (defalias
 ;;   s (t! type s)
 ;;   d (t! type d)
 ;; )
 (defvar
-  chord-timeout 60
+  chord-timeout 50
 )
 (defchords chord-sd-tab $chord-timeout
   (s  ) (t! type s)
@@ -145,45 +198,46 @@
   0    (chord chord-90-bspc 0)
 
   ;; Row of qwe
-  tab  (t! home-row-mod tab   @arrows-mouse)
-  q    (t! home-row-mod- $tot 350 q    lmet)
-  w    (t! home-row-mod w    lalt)
-  e    (t! home-row-mod e    lctl)
-  r    (t! type r)
-  t    (t! type t)
-  y    (t! type y)
-  u    (t! type u)
-  i    (t! home-row-mod i    rctl)
-  o    (t! home-row-mod o    lalt)
-  p    (t! home-row-mod- $tot 350 p    lmet)
-  [    (t! home-row-mod [     @arrows-mouse)
-  ]    (t! type ])
+  tab  (t!  hrm   $tapping-term   tab   @arrows-mouse)
+  ;; q    (t! lhrm- $tot 350 q    lmet)
+  w    (t! lhrm   $tapping-term   w    lalt)
+  e    (t! lhrm   $tapping-term   e    lctl)
+  r    (t! nomod r)
+  t    (t! nomod t)
+  y    (t! nomod y)
+  u    (t! nomod u)
+  i    (t! rhrm   $tapping-term   i    rctl)
+  o    (t! rhrm   $tapping-term   o    lalt)
+  ;; p    (t! rhrm- $tot 350 p    lmet)
+  [    (t! hrm    $tapping-term   [     @arrows-mouse)
+  ]    (t! nomod ])
 
   ;; Row of asd
   caps (tap-hold 100 100 caps @num-FKeys)
-  a    (t! type a)
+  a    (t! nomod a)
   s    (chord chord-sd-tab s)
   d    (chord chord-sd-tab d)
-  f    (t! home-row-mod f    lsft)
-  g    (t! type g)
-  h    (t! type h)
-  j    (t! home-row-mod j    rsft)
+  f    (t! lhrm   $tapping-term   f    lsft)
+  g    (t! nomod g)
+  h    (t! nomod h)
+  j    (t! rhrm   $tapping-term   j    rsft)
   k    (chord chord-kl-ret k)
   l    (chord chord-kl-ret l)
-  ;    (t! type ;)
-  '    (t! home-row-mod '    @num-FKeys)
+  ;    (t! nomod ;)
+  '    (t! rhrm   $tapping-term   '    @num-FKeys)
   
   ;; Row of z
-  z    (t! type z)
-  x    (t! type x)
-  c    (t! home-row-mod c    ralt)
-  v    (t! type v)
-  b    (t! type b) 
-  n    (t! type n)
-  m    (t! home-row-mod m    ralt)
-  ,    (t! type ,)
-  .    (t! type .)
-  /    (t! type /)
+  z    (t! nomod z)
+  x    (t! nomod x)
+  c    (t! lhrm   $tapping-term   c    ralt)
+  v    (t! nomod v)
+  b    (t! nomod b) 
+  n    (t! nomod n)
+  m    (t! rhrm   $tapping-term   m    ralt)
+  ,    (t! nomod ,)
+  .    (t! nomod .)
+  /    (t! nomod /)
+
 
   F1   (tap-hold 200 600 F1  @L1)
   F12  (tap-hold 200 600 F12 lrld)
