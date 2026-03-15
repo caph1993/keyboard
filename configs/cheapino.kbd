@@ -111,42 +111,40 @@
 (defvar
   chord-timeout 50
 )
-;; (defchords chord-sd-tab $chord-timeout
-;;   (s  ) (t! type s)
-;;   (  d) (t! type d)
-;;   (s d) tab
-;; )
-;; (defchords chord-kl-ret $chord-timeout
-;;   (k  ) (t! type k)
-;;   (  l) (t! type l)
-;;   (k l) ret
-;; )
-;; (defchords chord-90-bspc $chord-timeout
-;;   (9  ) (t! type 9)
-;;   (  0) (t! type 0)
-;;   (9 0) (fork bspc (macro S-9 S-0) (sft))
-;; )
-;; (defchords chord-23-esc $chord-timeout
-;;   (2  ) (t! type 2)
-;;   (  3) (t! type 3)
-;;   (2 3) @esc
-;; )
+(defchords chord-xc-tab $chord-timeout
+  (x)    (t! nomod x)
+  (c)    (t! lhrm   $tapping-term   c    ralt)
+  (x c)  tab
+)
+(defchords chord-,.-ret $chord-timeout
+  (,)    (t! rhrm   $tapping-term   ,    ralt)
+  (.)    (t! nomod .)
+  (, .)   ret
+)
+(defchords chord-we-esc $chord-timeout
+  (w  ) (t! nomod w)
+  (  e) (t! nomod e)
+  (w e) esc
+)
+(defchords chord-io-bspc $chord-timeout
+  (i  ) (t! type i)
+  (  o) (t! type o)
+  (i o) bspc
+)
 
 (deflayermap (base)
   ;; Row of qwe
 
   q    (t! nomod q)
-  w    (t! nomod w)
-  e    (t! nomod e)
+  w    (chord chord-we-esc w)
+  e    (chord chord-we-esc e)
   r    (t! nomod r)
-  ;; s    (chord chord-sd-tab s)
-  ;; d    (chord chord-sd-tab d)
   t    (t! nomod t)
 
   y    (t! nomod y)
   u    (t! nomod u)
-  i    (t! nomod i)
-  o    (t! nomod o)
+  i    (chord chord-io-bspc i)
+  o    (chord chord-io-bspc o)
   p    (t! nomod p)
 
   ;; Row of asd
@@ -164,33 +162,25 @@
   
   ;; Row of z
   z    (t! nomod z)
-  x    (t! nomod x)
-  c    (t! lhrm   $tapping-term   c    ralt)
   v    (t! nomod v)
-  b    (t! nomod b) 
-  n    (t! nomod n)
-  m    (t! rhrm   $tapping-term   m    ralt)
-  ,    (t! nomod ,)
-  .    (t! nomod .)
-  /    (t! nomod /)
+  x    (chord chord-xc-tab x)
+  c    (chord chord-xc-tab c)
+  b    (t! nomod b)
 
+  n    (t! nomod n)
+  m    (t! nomod m)
+  ,    (chord chord-,.-ret ,)
+  .    (chord chord-,.-ret .)
+  /    (t! nomod /)
 
   ;; F1   (tap-hold 200 600 F1  @L1)
   ;; F12  (tap-hold 200 600 F12 lrld)
 
   spc  (tap-hold 200 200 spc nop2) ;; nop2=layer-lock
 
-  ;; row of space
-  ;; ralt (multi ralt nop1)
-  ;; left @← up @↑ down @↓ right @→
 )
 
 (deflayermap (nomods))
 
 (defalias arrows-mouse nop0)
 (defalias num-FKeys nop0)
-
-
-
-
-
