@@ -13,10 +13,19 @@ My pinkies stand on `tab` and `[`, and the rest of my fingers on `w` `e` `f` and
  [x] Use home row mods. To handle misfires, use timeless trick, but allow for same hand modifiers if the waiting time is long enough.
 
  [x] Improve right handed only navigation
-  
+ [x] Improve the layer locking system
+
+ [ ] Switch entirely to hrm or fast_typing_state
+
+ [ ] Switch ralt thumb and [ pinkie for the arrows layer. Put ralt somewhere else.
+
  [ ] Improve number and symbols, so that programming feels natural and comfortable.
 
- [x] Improve the layer locking system
+ [ ] Use the pre-optimized symbols layer on the cheapino.
+
+ [ ] Add colemak-dh or dvorak to the cheapino and a way to switch the layout.
+
+ [ ] Practice the new layout from time to time, but rely on your old habits for normal use.
 
 
 

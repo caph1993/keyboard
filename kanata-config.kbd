@@ -1,7 +1,15 @@
 (defcfg
   linux-dev-names-exclude (
     "Thomas Haukland Cheapino2 Keyboard"
+    "Thomas Haukland Cheapino2 Consumer Control"
+    "Thomas Haukland Cheapino2 System Control"
+    "Thomas Haukland Cheapino2"
   )
+  ;; "Bluetooth 3.0 Keyboard"
+  ;; "Dell WMI hotkeys"
+  ;; "AT Translated Set 2 keyboard"
+  ;; "Intel HID events"
+  ;; "Intel HID 5 button array"
   linux-continue-if-no-devs-found yes
   danger-enable-cmd yes
   movemouse-inherit-accel-state yes

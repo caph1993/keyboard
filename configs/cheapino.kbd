@@ -135,7 +135,7 @@
 (deflayermap (base)
   ;; Row of qwe
 
-  q    (t! nomod q)
+  q    (t! lhrm   $tapping-term   q    esc)  ;; larger keyboard memory
   w    (chord chord-we-esc w)
   e    (chord chord-we-esc e)
   r    (t! nomod r)
@@ -161,7 +161,7 @@
   ;    (t! hrm    $tapping-term   ;     @arrows-mouse)
   
   ;; Row of z
-  z    (t! nomod z)
+  z    (t! lhrm   $tapping-term   z    lsft)  ;; because shift is there in large keyboard
   v    (t! nomod v)
   x    (chord chord-xc-tab x)
   c    (chord chord-xc-tab c)
