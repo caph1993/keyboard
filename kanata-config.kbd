@@ -369,7 +369,7 @@ linux-dev-names-exclude (
   u XX
   p @lock-mouse
   [ (t! home-row-mod @unlock  @arrows-mouse)
-  ] XX
+  ] XX  
   lalt nop2 ;; slow movements
   rctl nop2 ;; slow movements
   spc (tap-hold 200 200 spc sft)
@@ -446,81 +446,12 @@ linux-dev-names-exclude (
 ;; Tip. Use: (multi (layer-while-held disabled) (layer-while-held some-layer)) to block all keys but those defined in some-layer
 
 
-;; ----------------------------------------------------------
-;; Mouse layer
-;; ----------------------------------------------------------
-
-(deftemplate  def-accel (key-name the-key delay-1 delay-2 delay-3 delay-4 delay-*)
-  (defvirtualkeys $key-name (macro⟳↑⤫ ($the-key 1 $delay-*) 25))
-  (defalias $key-name
-    (multi
-      (macro-release-cancel
-        ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25
-        ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25
-        ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25
-        ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25
-        ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25
-        ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25
-        ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25
-        ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25
-        ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25
-        ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25
-        ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25
-        ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25
-        (on-press press-vkey $key-name) ;; this repeats delay-* forever
-      )
-      (on-release release-vkey  $key-name)
-    )
-  )
-)
-;; Mouse movements (normal and slow)
-;; (t! def-accel  🖱↑n   🖱↑   50 150 400 1500 2500)
-;; (t! def-accel  🖱→n   🖱→   50 150 400 1500 2500)
-;; (t! def-accel  🖱←n   🖱←   50 150 400 1500 2500)
-;; (t! def-accel  🖱↓n   🖱↓   50 150 400 1500 2500)
-;; Scrollwheel movements (normal and slow)
-(t! def-accel  ☸↑n   🖱☸↑   5 15 40 150 250)
-(t! def-accel  ☸→n   🖱☸→   5 15 40 150 250)
-(t! def-accel  ☸←n   🖱☸←   5 15 40 150 250)
-(t! def-accel  ☸↓n   🖱☸↓   5 15 40 150 250)
-(t! def-accel  ☸↑s   🖱☸↑   5 10 20 30 50)
-(t! def-accel  ☸→s   🖱☸→   5 10 20 30 50)
-(t! def-accel  ☸←s   🖱☸←   5 10 20 30 50)
-(t! def-accel  ☸↓s   🖱☸↓   5 10 20 30 50)
-
-(defalias
-  ☸↑ (fork @☸↑n @☸↑s (nop2))
-  ☸→ (fork @☸→n @☸→s (nop2))
-  ☸← (fork @☸←n @☸←s (nop2))
-  ☸↓ (fork @☸↓n @☸↓s (nop2))
-)
-(defalias
-  🖱↑n  (🖱accel↑ 5 300 1 10)
-  🖱→n  (🖱accel→ 5 300 1 10)
-  🖱←n  (🖱accel← 5 300 1 10)
-  🖱↓n  (🖱accel↓ 5 300 1 10)
-  🖱↑s  (🖱accel↑ 25 300 1 10)
-  🖱→s  (🖱accel→ 25 300 1 10)
-  🖱←s  (🖱accel← 25 300 1 10)
-  🖱↓s  (🖱accel↓ 25 300 1 10)
-  🖱↑ (fork (fork @🖱↑n @☸↑ (nop1)) @🖱↑s (nop2))
-  🖱→ (fork (fork @🖱→n @☸→ (nop1)) @🖱→s (nop2))
-  🖱← (fork (fork @🖱←n @☸← (nop1)) @🖱←s (nop2))
-  🖱↓ (fork (fork @🖱↓n @☸↓ (nop1)) @🖱↓s (nop2))
-)
 
 ;; ----------------------------------------------------------
 ;; Tab and arrows layer
 ;; ----------------------------------------------------------
 
-;; Dummy empty layer to change the icon in kanata-tray
-(deflayermap (sldr-on))
-(defvirtualkeys sldr-on (layer-while-held sldr-on))
-(defvirtualkeys sldr-off (on-press release-vkey sldr-on))
-(defalias *sldr (multi
-  (on-press press-vkey sldr-on)
-  (on-idle 200 tap-vkey sldr-off)
-))
+(include "configs/mouse.kbd")
 
 ;; nop0 is the "go to extreme" button <=>l
 ;; nop3 is a "ctl" button. All ctl buttons trigger nop3, except the tab key for which certain keys are unmoded.
@@ -531,12 +462,6 @@ linux-dev-names-exclude (
 (defalias →    (fork right end (nop1)))
 (defalias C←   (fork (tap-hold 200 300 C-left (macro home)) home (nop1)))
 (defalias C→   (fork (tap-hold 200 300 C-right (macro end)) end (nop1)))
-;; (defalias ←←   (fork home pgup (nop1)))
-;; (defalias →→   (fork end  pgdn (nop1)))
-
-(defalias *TeX (multi @*sldr (macro (unicode *) 150 bspc sldr 5 \)))
-(defalias *IPA (multi @*sldr (macro (unicode *) 150 bspc sldr 5 S-`)))
-
 (defalias btn1 (fork ret   🖰1   (nop1)))
 (defalias btn2 (fork @*TeX 🖰2   (nop1)))
 (defalias btn3 (fork ContextMenu   🖰3   (nop1)))
@@ -552,3 +477,5 @@ linux-dev-names-exclude (
 ;; ----------------------------------------------------------
 
 (include "configs/sldr.kbd")
+(defalias *TeX (multi @*sldr (macro (unicode *) 150 bspc sldr 5 \)))
+(defalias *IPA (multi @*sldr (macro (unicode *) 150 bspc sldr 5 S-`)))

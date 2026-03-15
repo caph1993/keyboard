@@ -1,0 +1,64 @@
+
+;; ----------------------------------------------------------
+;; Mouse layer
+;; ----------------------------------------------------------
+
+(deftemplate  def-accel (key-name the-key delay-1 delay-2 delay-3 delay-4 delay-*)
+  (defvirtualkeys $key-name (macro⟳↑⤫ ($the-key 1 $delay-*) 25))
+  (defalias $key-name
+    (multi
+      (macro-release-cancel
+        ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25
+        ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25
+        ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25 ($the-key 1 $delay-1) 25
+        ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25
+        ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25
+        ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25 ($the-key 1 $delay-2) 25
+        ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25
+        ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25
+        ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25 ($the-key 1 $delay-3) 25
+        ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25
+        ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25
+        ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25 ($the-key 1 $delay-4) 25
+        (on-press press-vkey $key-name) ;; this repeats delay-* forever
+      )
+      (on-release release-vkey  $key-name)
+    )
+  )
+)
+;; Mouse movements (normal and slow)
+;; (t! def-accel  🖱↑n   🖱↑   50 150 400 1500 2500)
+;; (t! def-accel  🖱→n   🖱→   50 150 400 1500 2500)
+;; (t! def-accel  🖱←n   🖱←   50 150 400 1500 2500)
+;; (t! def-accel  🖱↓n   🖱↓   50 150 400 1500 2500)
+;; Scrollwheel movements (normal and slow)
+(t! def-accel  ☸↑n   🖱☸↑   5 15 40 150 250)
+(t! def-accel  ☸→n   🖱☸→   5 15 40 150 250)
+(t! def-accel  ☸←n   🖱☸←   5 15 40 150 250)
+(t! def-accel  ☸↓n   🖱☸↓   5 15 40 150 250)
+(t! def-accel  ☸↑s   🖱☸↑   5 10 20 30 50)
+(t! def-accel  ☸→s   🖱☸→   5 10 20 30 50)
+(t! def-accel  ☸←s   🖱☸←   5 10 20 30 50)
+(t! def-accel  ☸↓s   🖱☸↓   5 10 20 30 50)
+
+(defalias
+  ☸↑ (fork @☸↑n @☸↑s (nop2))
+  ☸→ (fork @☸→n @☸→s (nop2))
+  ☸← (fork @☸←n @☸←s (nop2))
+  ☸↓ (fork @☸↓n @☸↓s (nop2))
+)
+(defalias
+  🖱↑n  (🖱accel↑ 5 300 1 10)
+  🖱→n  (🖱accel→ 5 300 1 10)
+  🖱←n  (🖱accel← 5 300 1 10)
+  🖱↓n  (🖱accel↓ 5 300 1 10)
+  🖱↑s  (🖱accel↑ 25 300 1 10)
+  🖱→s  (🖱accel→ 25 300 1 10)
+  🖱←s  (🖱accel← 25 300 1 10)
+  🖱↓s  (🖱accel↓ 25 300 1 10)
+  🖱↑ (fork (fork @🖱↑n @☸↑ (nop1)) @🖱↑s (nop2))
+  🖱→ (fork (fork @🖱→n @☸→ (nop1)) @🖱→s (nop2))
+  🖱← (fork (fork @🖱←n @☸← (nop1)) @🖱←s (nop2))
+  🖱↓ (fork (fork @🖱↓n @☸↓ (nop1)) @🖱↓s (nop2))
+)
+

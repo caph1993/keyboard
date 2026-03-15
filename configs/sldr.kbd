@@ -1,4 +1,14 @@
 
+;; Dummy empty layer to change the icon in kanata-tray
+(deflayermap (sldr-on))
+(defvirtualkeys sldr-on (layer-while-held sldr-on))
+(defvirtualkeys sldr-off (on-press release-vkey sldr-on))
+(defalias *sldr (multi
+  (on-press press-vkey sldr-on)
+  (on-idle 200 tap-vkey sldr-off)
+))
+
+
 (deftemplate def-seq (vk-name input-keys output-action)
   (defvirtualkeys $vk-name $output-action)
   (defseq $vk-name $input-keys)

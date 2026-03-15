@@ -22,7 +22,7 @@
   a s d f g   h j k l ;
   z x c v b   n m , . /
   esc spc tab
-  del ret bspc
+  ralt ret bspc
 )
 
 (defvar
@@ -177,10 +177,71 @@
   ;; F12  (tap-hold 200 600 F12 lrld)
 
   spc  (tap-hold 200 200 spc nop2) ;; nop2=layer-lock
-
+  ralt (multi ralt nop1)
 )
 
 (deflayermap (nomods))
 
-(defalias arrows-mouse nop0)
-(defalias num-FKeys nop0)
+
+(defalias
+  arrows (multi
+    (layer-while-held arrows-right)
+  )
+  mouse  (multi
+    (layer-while-held mouse)
+  )
+  num  (multi
+    (layer-while-held num)
+  )
+)
+
+(defalias arrows-mouse (multi
+  @arrows
+  (fork XX @mouse (ralt nop1))
+))
+(defalias num-FKeys (multi
+  @num
+  (fork XX (layer-while-held FKeys) (ralt nop1)))
+)
+
+(deflayermap arrows-right
+  y C-y
+  j @←
+  k (fork (tap-dance-eager 200 ((tap-hold 200 200 @↑ rctl) @↑)) @↑ (nop1))
+  , (fork (tap-dance-eager 200 ((tap-hold 200 200 @↓ rctl) @↓)) @↓ (nop1))
+  l @→
+  u @bspc
+  . @del
+
+  n @btn1 m @btn2
+  spc (tap-hold 200 200 spc sft)
+  ralt nop1
+)
+(deflayermap mouse
+  j @🖱←   k @🖱↑  , @🖱↓   l @🖱→
+  n 🖰1    m 🖰2
+  x C-x   z C-z  c C-c    v C-v    y C-y
+  u XX
+  ] XX  
+  lalt nop2 ;; slow movements
+  rctl nop2 ;; slow movements
+  spc (tap-hold 200 200 spc sft)
+)
+
+(include "mouse.kbd")
+(defalias ↑    (fork up   @☸↑ (nop1)))
+(defalias ↓    (fork down @☸↓ (nop1)))
+(defalias ←    (fork left home (nop1)))
+(defalias →    (fork right end (nop1)))
+(defalias C←   (fork (tap-hold 200 300 C-left (macro home)) home (nop1)))
+(defalias C→   (fork (tap-hold 200 300 C-right (macro end)) end (nop1)))
+(defalias btn1 (fork ret   🖰1   (nop1)))
+(defalias btn2 (fork XX 🖰2   (nop1)))
+(defalias btn3 (fork ContextMenu   🖰3   (nop1)))
+(defalias bspc  (tap-hold 200 600 bspc   (macro (unmod lsft home) (unmod bspc))))
+(defalias Cbspc (tap-hold 200 600 C-bspc (macro (unmod lsft home) (unmod bspc))))
+(defalias del   (tap-hold 200 600 del    (macro (unmod lsft end ) (unmod del ))))
+(defalias Cdel  (tap-hold 200 600 C-del  (macro (unmod lsft end ) (unmod del ))))
+
+(deflayermap num)
+(deflayermap FKeys)
