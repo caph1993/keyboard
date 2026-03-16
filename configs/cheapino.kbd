@@ -21,8 +21,9 @@
   q w e r t   y u i o p
   a s d f g   h j k l ;
   z x c v b   n m , . /
-  lalt spc esc
-  ralt ret bspc
+  lalt spc ralt
+
+  brdn
 )
 
 (defvar
@@ -40,147 +41,144 @@
   home-row-right-keys (j i o p ')        ;; home row mods - these will output a tap if they're released after the first key
 )
 
-;; home row mods templates mimicking urob's timerless home row mods implementation
-(deftemplate nomod (tap-key)
-  (multi $tap-key @tap)
-)
-(defalias
-  ;; quasi-zmk's 'require-prior-idle' behavior
-  tap (multi                                             
-    (layer-switch nomods)                                ;; temporarily switches to a layer with no home row mods enabled
-    (on-idle $require-prior-idle tap-virtualkey to-base) ;; when $require-prior-idle expires, uses the fake key to return to base layer (see )
-  )
-)
-(defvirtualkeys  
-  to-base (layer-switch base)
-)
-
-
-;; home row mods templates mimicking urob's timeless home row mods implementation
-(deftemplate lhrm (tappingterm tap-key hold-key)  ;; left hand mods
-  (tap-hold-release-tap-keys-release $quick-tap-ms $tappingterm
-    (t! nomod $tap-key)
-    $hold-key
-    $left-side-keys $home-row-left-keys
-  )
-)
-
-(deftemplate rhrm (tappingterm tap-key hold-key)  ;; right hand mods
-  (tap-hold-release-tap-keys-release $quick-tap-ms $tappingterm
-    (t! nomod $tap-key)
-    $hold-key
-    $right-side-keys $home-row-right-keys
-  )
-)
-
-(deftemplate hrm (tappingterm tap-key hold-key)  ;; mod ignoring hands
-  (tap-hold $quick-tap-ms $tappingterm
-    (t! nomod $tap-key)
-    $hold-key
-  )
-)
+;; home row mods templates mimicking urob's timerless home row mods implementation mixed with gerhard's sided home row mods.
 
 ;; https://github.com/jtroo/kanata/discussions/1656#discussioncomment-14382030
 (defvirtualkeys fast_typing_state XX)
-(defvar
-  tot 220  ;; time out tap
-)
-(deftemplate type (action)
+(deftemplate nomod (tap)
   (multi
     (fork
        (hold-for-duration 55 fast_typing_state)
       XX
       (lctl rctl lalt ralt lmet rmet)
     )
-    $action
+    $tap
   )
 )
-(deftemplate home-row-mod- (timeouttap timeouthold keytap keyhold)
+(deftemplate hrm (tappingterm tap-key hold-key)
   (switch
-    ((input virtual fast_typing_state)) (t! type $keytap) break
-    () (tap-hold $timeouttap $timeouthold
-         (t! type $keytap)
-         $keyhold
+    ((input virtual fast_typing_state)) (t! nomod $tap-key) break
+    () (tap-hold $quick-tap-ms $tappingterm
+         (t! nomod $tap-key)
+         $hold-key
        ) break
   )
 )
-(deftemplate home-row-mod (keytap keyhold)
-  (t! home-row-mod- $tot 220 $keytap $keyhold)
+(deftemplate hrm-sided (tappingterm tap-key hold-key same-side-keys home-row-keys)
+  (switch
+    ((input virtual fast_typing_state)) (t! nomod $tap-key) break
+    () (tap-hold-release-tap-keys-release $quick-tap-ms $tappingterm
+        (t! nomod $tap-key)
+        $hold-key
+        $same-side-keys $home-row-keys
+       ) break
+  )
 )
+(deftemplate rhrm (tappingterm tap-key hold-key)  ;; right hand mods
+  (t! hrm-sided $tappingterm $tap-key $hold-key $right-side-keys $home-row-right-keys)
+)
+(deftemplate lhrm (tappingterm tap-key hold-key)  ;; left hand mods
+  (t! hrm-sided $tappingterm $tap-key $hold-key $left-side-keys $home-row-left-keys)
+)
+
 
 (defvar
   chord-timeout 50
 )
 (defchords chord-xc-tab $chord-timeout
-  (x)    (t! nomod x)
-  (c)    (t! lhrm   $tapping-term   c    ralt)
+  (x)    (t! nomod @x)
+  (c)    (t! lhrm   $tapping-term   @c    ralt)
   (x c)  tab
 )
 (defchords chord-,.-ret $chord-timeout
-  (,)    (t! rhrm   $tapping-term   ,    ralt)
-  (.)    (t! nomod .)
+  (,)    (t! rhrm   $tapping-term   @,    ralt)
+  (.)    (t! nomod @.)
   (, .)   ret
 )
 (defchords chord-we-esc $chord-timeout
-  (w  ) (t! nomod w)
-  (  e) (t! nomod e)
+  (w  ) (t! nomod @w)
+  (  e) (t! nomod @e)
   (w e) esc
 )
 (defchords chord-io-bspc $chord-timeout
-  (i  ) (t! type i)
-  (  o) (t! type o)
+  (i  ) (t! nomod @i)
+  (  o) (t! nomod @o)
   (i o) bspc
+)
+(defchords chord-;spc-nav $chord-timeout
+  (;  )   (t! hrm    $tapping-term   @;     (multi nop1 (layer-while-held disabled) (layer-while-held spc-arrows)))
+  (  spc) (t! hrm      $tapping-term   spc @arrows-mouse)
+  (; spc) @mouse 
+)
+;; ;; QWERTY
+;; (defalias q q w w e e r r t t y y u u i i o o p p 
+;;   a a s s d d f f g g h h j j k k l l ; ;
+;;   z z x x c c v v b b n n m m , , . . / /
+;; )
+;; QWERTY -> COLEMAK-DH
+(defalias
+  q q  w w  e f  r p  t b    y j  u l  i u  o y  p ;
+  a a  s r  d s  f t  g g    h m  j n  k e  l i  ; o
+  z z  x x  c c  v d  b v    n k  m h  , ,  . .  / /
 )
 
 (deflayermap (base)
   ;; Row of qwe
 
-  q    (t! lhrm   $tapping-term   q    esc)  ;; larger keyboard memory
+  q    (t! lhrm   $tapping-term   @q    esc)  ;; larger keyboard memory
   w    (chord chord-we-esc w)
   e    (chord chord-we-esc e)
-  r    (t! nomod r)
-  t    (t! nomod t)
+  r    (t! nomod @r)
+  t    (t! nomod @t)
 
-  y    (t! nomod y)
-  u    (t! nomod u)
+  y    (t! nomod @y)
+  u    (t! nomod @u)
   i    (chord chord-io-bspc i)
   o    (chord chord-io-bspc o)
-  p    (t! nomod p)
+  p    (t! nomod @p)
 
   ;; Row of asd
-  a    (t!  hrm   $tapping-term   a   @arrows-mouse)
-  s    (t! lhrm   $tapping-term   s    lalt)
-  d    (t! lhrm   $tapping-term   d    lctl)
-  f    (t! lhrm   $tapping-term   f    lsft)
-  g    (t! nomod g)
+  a    (t!  hrm   $tapping-term   @a   @arrows-mouse)
+  s    (t! lhrm   $tapping-term   @s    lalt)
+  d    (t! lhrm   $tapping-term   @d    lctl)
+  f    (t! lhrm   $tapping-term   @f    lsft)
+  g    (t! nomod @g)
   
-  h    (t! nomod h)
-  j    (t! rhrm   $tapping-term   j    rsft)
-  k    (t! rhrm   $tapping-term   k    rctl)
-  l    (t! rhrm   $tapping-term   l    lalt)
-  ;    (t! hrm    $tapping-term   ;     @arrows-mouse)
+  h    (t! nomod @h)
+  j    (t! rhrm   $tapping-term   @j    rsft)
+  k    (t! rhrm   $tapping-term   @k    rctl)
+  l    (t! rhrm   $tapping-term   @l    lalt)
+  ;    (chord chord-;spc-nav ;)
   
   ;; Row of z
-  z    (t! lhrm   $tapping-term   z    lsft)  ;; because shift is there in large keyboard
-  v    (t! nomod v)
+  z    (t! lhrm   $tapping-term   @z    lsft)  ;; because shift is there in large keyboard
+  v    (t! nomod @v)
   x    (chord chord-xc-tab x)
   c    (chord chord-xc-tab c)
-  b    (t! nomod b)
+  b    (t! nomod @b)
 
-  n    (t! nomod n)
-  m    (t! nomod m)
+  n    (t! lhrm   $tapping-term   @n    ralt)
+  m    (t! nomod @m)
   ,    (chord chord-,.-ret ,)
   .    (chord chord-,.-ret .)
-  /    (t! nomod /)
+  /    (t! nomod @/)
 
   ;; F1   (tap-hold 200 600 F1  @L1)
   ;; F12  (tap-hold 200 600 F12 lrld)
-
-  spc  (tap-hold 200 200 spc nop2) ;; nop2=layer-lock
+  
+  spc    (chord chord-;spc-nav spc)
   ralt (multi ralt nop1)
+  brdn lrld
 )
 
 (deflayermap (nomods))
+
+(deflayermap spc-arrows
+  spc (t! hrm      $tapping-term   spc @arrows-mouse)
+)
+(deflayermap disabled
+  q XX w XX e XX r XX t XX y XX u XX i XX o XX p XX a XX s XX d XX f XX g XX h XX j XX k XX l XX z XX x XX c XX v XX b XX n XX m XX , XX . XX / XX spc XX lalt XX ralt XX
+)
 
 
 (defalias
