@@ -17,11 +17,11 @@ My pinkies stand on `tab` and `[`, and the rest of my fingers on `w` `e` `f` and
  [x] Switch entirely to hrm or fast_typing_state
  [x] Switch ralt thumb and [ pinkie for the arrows layer. Put ralt somewhere else.
 
- [ ] Practice number and symbols, so that programming feels natural and comfortable.
+ [x] Practice number and symbols, so that programming feels natural and comfortable.
 
- [ ] Use the pre-optimized symbols layer on the cheapino.
+ [x] Use the pre-optimized symbols layer on the cheapino.
 
- [ ] Add colemak-dh or dvorak to the cheapino and a way to switch the layout.
+ [x] Add colemak-dh or dvorak to the cheapino and a way to switch the layout.
 
  [ ] Practice the new layout from time to time, but rely on your old habits for normal use.
 
