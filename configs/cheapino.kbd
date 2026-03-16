@@ -3,6 +3,9 @@
 (defcfg
   linux-dev-names-include (
     "Thomas Haukland Cheapino2 Keyboard"
+    "Thomas Haukland Cheapino2 Consumer Control"
+    "Thomas Haukland Cheapino2 System Control"
+    "Thomas Haukland Cheapino2"
   )
   linux-continue-if-no-devs-found yes
   process-unmapped-keys yes
@@ -23,8 +26,20 @@
   z x c v b   n m , . /
   lalt spc ralt
 
-  brdn
+  VolumeUp VolumeDown MediaPlayPause
 )
+;; ;; QWERTY
+;; (defalias q q w w e e r r t t y y u u i i o o p p 
+;;   a a s s d d f f g g h h j j k k l l ; ;
+;;   z z x x c c v v b b n n m m , , . . / /
+;; )
+;; QWERTY -> COLEMAK-DH
+(defalias
+  q q  w w  e f  r p  t b    y j  u l  i u  o y  p ;
+  a a  s r  d s  f t  g g    h m  j n  k e  l i  ; o
+  z z  x x  c c  v d  b v    n k  m h  , ,  . .  / /
+)
+
 
 (defvar
   ;; timings in ms using ZMK-like names
@@ -35,10 +50,10 @@
   combo-timeout 60                       ;; same as ZMK
   
   ;; keys for tap-hold-release-tap-keys-release templates
-  left-side-keys   (r t s d g z x c v b) ;; these keys will always make the precedent same hand tap-hold-release-tap-keys-release output tap. B is missing because I, sometimes, alt finger it
-  right-side-keys  (y u k l ; m n , .) ;; these keys will always make the precedent same hand tap-hold-release-tap-keys-release output tap
-  home-row-left-keys  (q w e a f)      ;; home row mods - these will output a tap if they're released after the first key
-  home-row-right-keys (j i o p ')        ;; home row mods - these will output a tap if they're released after the first key
+  left-side-keys   (q w e r t g z x c v b) ;; these keys will always make the precedent same hand tap-hold-release-tap-keys-release output tap. B is missing because I, sometimes, alt finger it
+  right-side-keys  (y u i o p ; m , .) ;; these keys will always make the precedent same hand tap-hold-release-tap-keys-release output tap
+  home-row-left-keys  (a s d f)      ;; home row mods - these will output a tap if they're released after the first key
+  home-row-right-keys (j k l ; n)        ;; home row mods - these will output a tap if they're released after the first key
 )
 
 ;; home row mods templates mimicking urob's timerless home row mods implementation mixed with gerhard's sided home row mods.
@@ -90,11 +105,6 @@
   (c)    (t! lhrm   $tapping-term   @c    ralt)
   (x c)  tab
 )
-(defchords chord-,.-ret $chord-timeout
-  (,)    (t! rhrm   $tapping-term   @,    ralt)
-  (.)    (t! nomod @.)
-  (, .)   ret
-)
 (defchords chord-we-esc $chord-timeout
   (w  ) (t! nomod @w)
   (  e) (t! nomod @e)
@@ -105,50 +115,58 @@
   (  o) (t! nomod @o)
   (i o) bspc
 )
-(defchords chord-;spc-nav $chord-timeout
-  (;  )   (t! hrm    $tapping-term   @;     (multi nop1 (layer-while-held disabled) (layer-while-held spc-arrows)))
-  (  spc) (t! hrm      $tapping-term   spc @arrows-mouse)
+(defchords chords-spc $chord-timeout
+
+  (q)   (t! lhrm   $tapping-term   @q    esc)
+  (g)   (t! rhrm   $tapping-term  @g lmet)
+  (p)   (t! rhrm   $tapping-term  @p  @FKeys)
+
+  (h)   (t! nomod @h)
+  (;  )   (t! rhrm    $tapping-term   @;     (multi nop1 (layer-while-held disabled) (layer-while-held spc-arrows)))
+  (n)    (t! rhrm   $tapping-term   @n    ralt)
+  (m)    (t! nomod @m)
+  (,)    (t! nomod @,)
+  (.)    (t! nomod @.)
+  (/)    (t! rhrm   $tapping-term  @/  @numbers)
+  (, .)   ret
+  (  spc) (t! hrm    $tapping-term   spc @arrows-mouse)
   (; spc) @mouse 
-)
-;; ;; QWERTY
-;; (defalias q q w w e e r r t t y y u u i i o o p p 
-;;   a a s s d d f f g g h h j j k k l l ; ;
-;;   z z x x c c v v b b n n m m , , . . / /
-;; )
-;; QWERTY -> COLEMAK-DH
-(defalias
-  q q  w w  e f  r p  t b    y j  u l  i u  o y  p ;
-  a a  s r  d s  f t  g g    h m  j n  k e  l i  ; o
-  z z  x x  c c  v d  b v    n k  m h  , ,  . .  / /
+  (m spc) @bspc
+  (. spc) @del
+  (/ spc) @numbers
+  (p spc) @FKeys
+  (h spc) tab
+  (q spc) esc
+  (g spc) (multi lmet spc)
 )
 
 (deflayermap (base)
   ;; Row of qwe
 
-  q    (t! lhrm   $tapping-term   @q    esc)  ;; larger keyboard memory
+  q    (chord chords-spc q)
   w    (chord chord-we-esc w)
   e    (chord chord-we-esc e)
   r    (t! nomod @r)
   t    (t! nomod @t)
 
   y    (t! nomod @y)
-  u    (t! nomod @u)
+  u    (tap-hold 200 600 (t! nomod @u) @*TeX)
   i    (chord chord-io-bspc i)
   o    (chord chord-io-bspc o)
-  p    (t! nomod @p)
+  p    (chord chords-spc p)
 
   ;; Row of asd
   a    (t!  hrm   $tapping-term   @a   @arrows-mouse)
   s    (t! lhrm   $tapping-term   @s    lalt)
   d    (t! lhrm   $tapping-term   @d    lctl)
   f    (t! lhrm   $tapping-term   @f    lsft)
-  g    (t! nomod @g)
+  g    (chord chords-spc g)
   
-  h    (t! nomod @h)
+  h    (chord chords-spc h)
   j    (t! rhrm   $tapping-term   @j    rsft)
   k    (t! rhrm   $tapping-term   @k    rctl)
   l    (t! rhrm   $tapping-term   @l    lalt)
-  ;    (chord chord-;spc-nav ;)
+  ;    (chord chords-spc ;)
   
   ;; Row of z
   z    (t! lhrm   $tapping-term   @z    lsft)  ;; because shift is there in large keyboard
@@ -157,21 +175,19 @@
   c    (chord chord-xc-tab c)
   b    (t! nomod @b)
 
-  n    (t! lhrm   $tapping-term   @n    ralt)
-  m    (t! nomod @m)
-  ,    (chord chord-,.-ret ,)
-  .    (chord chord-,.-ret .)
-  /    (t! nomod @/)
+  n    (chord chords-spc n)
+  m    (chord chords-spc m)
+  ,    (chord chords-spc ,)
+  .    (chord chords-spc .)
+  /    (chord chords-spc /)
 
   ;; F1   (tap-hold 200 600 F1  @L1)
   ;; F12  (tap-hold 200 600 F12 lrld)
   
-  spc    (chord chord-;spc-nav spc)
-  ralt (multi ralt nop1)
-  brdn lrld
+  spc    (chord chords-spc spc)
+  lalt   (chord chords-spc spc)
+  ralt   (chord chords-spc spc)
 )
-
-(deflayermap (nomods))
 
 (deflayermap spc-arrows
   spc (t! hrm      $tapping-term   spc @arrows-mouse)
@@ -183,13 +199,19 @@
 
 (defalias
   arrows (multi
+    (layer-while-held symbols-left)
     (layer-while-held arrows-right)
   )
   mouse  (multi
     (layer-while-held mouse)
   )
-  num  (multi
-    (layer-while-held num)
+  numbers (multi
+    (layer-while-held numbers-left)
+    (layer-while-held arrows-right)
+  )
+  FKeys (multi
+    (layer-while-held FKeys-left)
+    (layer-while-held arrows-right)
   )
 )
 
@@ -197,56 +219,141 @@
   @arrows
   (fork XX @mouse (ralt nop1))
 ))
-(defalias num-FKeys (multi
-  @num
-  (fork XX (layer-while-held FKeys) (ralt nop1)))
-)
 
 
 
 
 (defchords chord-arrows-k $chord-timeout
   (j) @←
-  (k) (fork (tap-dance-eager 200 ((tap-hold 200 200 @↑ rctl) @↑)) @↑ (nop1))
-  (,) (fork (tap-dance-eager 200 ((tap-hold 200 200 @↓ rctl) @↓)) @↓ (nop1))
+  (k) @↑
   (l) @→
-  (u) @bspc
+  
+  (m) @bspc
+  (,) @↓
   (.) @del
 
   (k j) @C←
   (k l) @C→
-  (k u) @Cbspc
+  (k m) @Cbspc
   (k .) @Cdel
 
   (j k l) lrld
 )
 (deflayermap arrows-right
+
   y C-y
+  u rsft
+  i rctl
+  o lalt
+  p esc
+
+  h tab
   j (chord chord-arrows-k j)
   k (chord chord-arrows-k k)
-  , (chord chord-arrows-k ,)
   l (chord chord-arrows-k l)
-  u (chord chord-arrows-k u)
+  ; XX
+
+  n (fork ret   🖰1   (nop1))
+  m (chord chord-arrows-k m)
+  , (chord chord-arrows-k ,)
   . (chord chord-arrows-k .)
+  / @numbers
   
-  p esc
-  h tab
-  n XX
-  m (fork ret   🖰1   (nop1))
-  spc (tap-hold 200 200 spc sft)
-  ralt nop1
+  spc (tap-hold 200 200 spc @arrows)
 )
 (deflayermap mouse
-  j @🖱←   k @🖱↑  , @🖱↓   l @🖱→
-  m 🖰1
+  j @🖱←   k @🖱↑  , @🖱↓   l @🖱→  ;  nop1
+  n 🖰1
   h 🖰2
   x C-x   z C-z  c C-c    v C-v    y C-y
   u XX
   ] XX  
   lalt nop2 ;; slow movements
   rctl nop2 ;; slow movements
-  spc (tap-hold 200 200 spc sft)
+  spc (tap-hold 200 200 spc @mouse)
+  VolumeUp    blup
+  VolumeDown  bldn
 )
+
+
+(defchords chord-symbols-left-q $chord-timeout
+  (q)   (t! lhrm  $tapping-term  esc XX)
+  (w)   (t! nomod  -)
+  (e)   (t! nomod  S-[)
+  (r)   (t! nomod  S-])
+  (t)   (t! nomod  S-8)
+  (q w) (t! nomod S-=)
+  (w e) (t! nomod =)
+  (e r) (t! nomod XX)
+  (w r) (t! nomod S-5)
+)
+(defchords chord-symbols-left-a $chord-timeout
+  (a)   (t! nomod ')
+  (s)   (t!  lhrm  $tapping-term  S-'  lalt)
+  (d)   (t!  lhrm  $tapping-term  S-9  lctl)
+  (f)   (t!  lhrm  $tapping-term  S-0  lsft)
+  (g)   (t! nomod  S--)
+  (a s) (t! nomod `)
+  (s d) (t! nomod S-2)
+  (d f) (t! nomod S-;)
+  (s f) (t! nomod S-3)
+)
+(defchords chord-symbols-left-z $chord-timeout
+  (z)   (t! nomod  \)
+  (x)   (t! nomod  S-4)
+  (c)   (t! nomod  [)
+  (v)   (t! nomod  ])
+  (b)   (t! nomod  XX)
+  (z x) (t! nomod S-6)
+  (x c) (t! nomod S-\)
+  (c v) (t! nomod S-7)
+  (c b) (t! nomod S-`)
+)
+(deflayermap symbols-left
+  q (chord chord-symbols-left-q q)
+  w (chord chord-symbols-left-q w)
+  e (chord chord-symbols-left-q e)
+  r (chord chord-symbols-left-q r)
+  t (chord chord-symbols-left-q t)
+
+  a (chord chord-symbols-left-a a)
+  s (chord chord-symbols-left-a s)
+  d (chord chord-symbols-left-a d)
+  f (chord chord-symbols-left-a f)
+  g (chord chord-symbols-left-a g)
+
+  z (chord chord-symbols-left-z z)
+  x (chord chord-symbols-left-z x)
+  c (chord chord-symbols-left-z c)
+  v (chord chord-symbols-left-z v)
+  b (chord chord-symbols-left-z b)
+
+  VolumeUp    brup
+  VolumeDown  brdn
+)
+(deflayermap numbers-left
+  q esc
+  w 7
+  e 8
+  r 9
+  t 0
+
+  a .
+  s 4
+  d 5
+  f 6
+  g 0
+
+  z 0
+  x 1
+  c 2
+  v 3
+  b XX
+
+  VolumeDown  C-S-F6
+  VolumeUp    C-S-F7
+)
+
 
 (include "mouse.kbd")
 (defalias ↑    (fork up   @☸↑ (nop1)))
@@ -261,5 +368,28 @@
 (defalias del   (tap-hold 200 600 del    (macro (unmod lsft end ) (unmod del ))))
 (defalias Cdel  (tap-hold 200 600 C-del  (macro (unmod lsft end ) (unmod del ))))
 
-(deflayermap num)
-(deflayermap FKeys)
+(deflayermap FKeys-left
+  q esc
+  w F7
+  e F8
+  r F9
+  t F10
+ 
+  a XX
+  s F4
+  d F5
+  f F6
+  g F11
+
+  z F12
+  x F1
+  c F2
+  v F3
+  b XX
+
+  VolumeDown  C-S-F6
+  VolumeUp    C-S-F7
+)
+
+(include "sldr.kbd")
+(defalias *TeX (multi @*sldr (macro (unicode *) 150 bspc sldr 5 \)))
