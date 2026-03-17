@@ -8,8 +8,8 @@ SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 cd "$SCRIPT_DIR"
 COMMAND=""$SCRIPT_DIR/kanata_linux_x64" $@"
 CONFIG_FILE="$SCRIPT_DIR/../kanata-config.kbd"
-BACKUP_FILE="$SCRIPT_DIR/kanata-backup.kbd"
-LOG_FILE="$SCRIPT_DIR/kanata-log.log"
+BACKUP_FILE="$SCRIPT_DIR/../.kanata-watch/main-backup.kbd"
+LOG_FILE="$SCRIPT_DIR/../.kanata-watch/main-log.log"
 
 A1=""$COMMAND" --cfg "$CONFIG_FILE""
 A2="cp "$CONFIG_FILE" "$BACKUP_FILE""
@@ -39,4 +39,4 @@ exit $A1_EXIT_CODE
 B1=""$COMMAND" --cfg "$BACKUP_FILE""
 B="(echo \"BACKUP: '$B1'\"; eval '$B1')"
 
-echo "$CONFIG_FILE" | entr -r sh -c "$A || $B"
+echo "$CONFIG_FILE" | entr -n -r sh -c "$A || $B"

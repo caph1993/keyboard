@@ -17,6 +17,7 @@
   sequence-input-mode visible-backspaced ;; shows the sequence as it is typed
   ;; sequence-input-mode hidden-delay-type ;; hides while typing. Outputs if invalid
   sequence-timeout 8000 ;; 8 seconds maximum between key presses in sldr sequence
+  allow-hardware-repeat false ;; shorter logs when holding ralt.
   log-layer-changes no        ;; no logging
 )
 
@@ -88,10 +89,10 @@
   combo-timeout 60                       ;; same as ZMK
   
   ;; keys for tap-hold-release-tap-keys-release templates
-  left-side-keys   (r t s d g z x c v b) ;; these keys will always make the precedent same hand tap-hold-release-tap-keys-release output tap. B is missing because I, sometimes, alt finger it
-  right-side-keys  (y u k l ; m n , .) ;; these keys will always make the precedent same hand tap-hold-release-tap-keys-release output tap
-  home-row-left-keys  (q w e a f)      ;; home row mods - these will output a tap if they're released after the first key
-  home-row-right-keys (j i o p ')        ;; home row mods - these will output a tap if they're released after the first key
+  left-side-keys   (q r t s d g z x c v b) ;; these keys will always make the precedent same hand tap-hold-release-tap-keys-release output tap.
+  right-side-keys  (y u p k l ; m n , . /) ;; these keys will always make the precedent same hand tap-hold-release-tap-keys-release output tap
+  home-row-left-keys  (tab w e f caps a)      ;; home row mods - these will output a tap if they're released after the first key
+  home-row-right-keys (j i o [ l ')    ;; home row mods - these will output a tap if they're released after the first key
 )
 (defvirtualkeys fast_typing_state XX)
 (deftemplate nomod (tap)
@@ -149,10 +150,15 @@
   (  d) (t! nomod d)
   (s d) tab
 )
-(defchords chord-kl-ret $chord-timeout
-  (k  ) (t! nomod k)
-  (  l) (t! nomod l)
-  (k l) ret
+
+(defchords chord-main-right-lower $chord-timeout
+  (k) (t! nomod k)
+  (l) (t! rhrm   $tapping-term   l    ralt)
+  (m) (t! nomod m)
+
+  (m k) bspc
+  (k l) del
+  (m l) ret
 )
 (defchords chord-90-bspc $chord-timeout
   (9  ) (t! nomod 9)
@@ -164,64 +170,100 @@
   (  3) (t! nomod 3)
   (2 3) @esc
 )
-(defchords chords-spc $chord-timeout
-  ([  )   (t! hrm    $tapping-term   [     (multi nop1 (layer-while-held disabled) (layer-while-held spc-arrows)))
-  (spc)   (t! hrm    $tapping-term   spc @arrows-mouse)
-  (tab)   (t!  hrm   $tapping-term   tab   @arrows-mouse)
-  
-  ([ spc) @mouse 
-  (tab spc) (multi lalt (macro tab) (layer-while-held disabled) (layer-while-held alt-tab-layer))
-)
 
+(defchords chord-main-right-middle $chord-timeout
+  (ralt) ralt
+  (j)    (t! rhrm   $tapping-term   j    rsft)
+  (i)    (t! rhrm   $tapping-term   i    rctl)
+  (o)    (t! rhrm   $tapping-term   o    lalt)
+  ([)    (t! hrm    $tapping-term   [    lsft)
+
+  (j i)  bspc
+  (i o)  del
+  (j o)  ret
+  (o [)  tab
+  (i o [)  S-tab
+  ([ ralt)   @alt-tab-switcher
+  (i ralt)   @ctl-tab-switcher
+  (i ralt [) @ctl-tab-switcher
+)
+(defchords chords-spc $chord-timeout
+;; (multi nop1 (layer-while-held disabled) (layer-while-held spc-arrows))
+  ;; ([  )   (t! hrm    $tapping-term   [    lsft)
+  (spc)   (t! hrm    $tapping-term   spc  @arrows-mouse)
+  (tab)   (t!  hrm   $tapping-term   tab  lsft)
+  (')     (t! rhrm   $tapping-term   '    rctl)
+  
+  ;; ([ spc)   @tab-switcher
+  (tab spc) @tab-switcher
+
+  (' spc)   @mouse
+)
+(defalias 
+  alt-tab-switcher (multi lalt (macro tab) (layer-while-held disabled) (layer-while-held tab-switch-layer))
+  ctl-tab-switcher (multi lctl (macro tab) (layer-while-held disabled) (layer-while-held tab-switch-layer))
+  tab-switcher (fork @alt-tab-switcher @ctl-tab-switcher (ctl))
+)
 (deflayermap (base)
   ;; Row of F keys
   esc @esc
 
-  ;; Row of numbers
+  ;; Upper-left
   2    (chord chord-23-esc 2)
   3    (chord chord-23-esc 3)
+
+  ;; Middle
+  tab  (chord chords-spc tab)
+  q    (t! nomod q)
+  w    (t! lhrm   $tapping-term   w    lalt)
+  e    (t! lhrm   $tapping-term   e    lctl)
+  f    (t! lhrm   $tapping-term   f    @arrows-right)
+
+
+  r    (t! nomod r)
+  t    (t! nomod t)
+  ;; Row of asd
+  caps (tap-hold 100 100 caps lctl)
+  a    (t! lhrm   $tapping-term   a    ralt)
+  s    (chord chord-sd-tab s)
+  d    (chord chord-sd-tab d)
+  g    (t! nomod g)
+
+  ;; Row of z
+  z    (t! nomod z)
+  x    (t! nomod x)
+  c    (t! nomod c)
+  v    (t! nomod v)
+  b    (t! nomod b)
+  
+
+  ;; Right middle
+  j    (chord chord-main-right-middle j)
+  i    (chord chord-main-right-middle i)
+  o    (chord chord-main-right-middle o)
+  [    (chord chord-main-right-middle [)
+  ralt (chord chord-main-right-middle ralt)
+  p    (t! nomod p)
+  ]    (t! nomod ])
+
+  ;; Right lower
+  m    (chord chord-main-right-lower m)
+  k    (chord chord-main-right-lower k)
+  l    (chord chord-main-right-lower l)
+  ;    (t! nomod ;)
+  '    (chord chords-spc ')
+  
+  ;; Right upper
+  u    (t! nomod u)
   9    (chord chord-90-bspc 9)
   0    (chord chord-90-bspc 0)
   -    (t! rhrm   $tapping-term   -    rsft)
 
-  ;; Row of qwe
-  tab  (chord chords-spc tab)
-  ;; q    (t! lhrm- $tot 350 q    lmet)
-  w    (t! lhrm   $tapping-term   w    lalt)
-  e    (t! lhrm   $tapping-term   e    lctl)
-  r    (t! nomod r)
-  t    (t! nomod t)
-  y    (t! nomod y)
-  u    (t! nomod u)
-  i    (t! rhrm   $tapping-term   i    rctl)
-  o    (t! rhrm   $tapping-term   o    lalt)
-  p    (t! rhrm   $tapping-term   p    ralt)
-  ;; p    (t! rhrm- $tot 350 p    lmet)
-  [    (chord chords-spc [)
-  ]    (t! nomod ])
-
-  ;; Row of asd
-  caps (tap-hold 100 100 caps lctl)
-  a    (t! nomod a)
-  s    (chord chord-sd-tab s)
-  d    (chord chord-sd-tab d)
-  f    (t! lhrm   $tapping-term   f    lsft)
-  g    (t! nomod g)
+  y    (tap-hold 200 200 (t! nomod y) @*TeX)
   h    (t! nomod h)
-  j    (t! rhrm   $tapping-term   j    rsft)
-  k    (chord chord-kl-ret k)
-  l    (chord chord-kl-ret l)
-  ;    (t! nomod ;)
-  '    (t! rhrm   $tapping-term   '    @num-FKeys)
-  
-  ;; Row of z
-  z    (t! nomod z)
-  x    (t! nomod x)
-  c    (t! lhrm   $tapping-term   c    ralt)
-  v    (t! nomod v)
-  b    (t! nomod b)
   n    (t! nomod n)
-  m    (t! rhrm   $tapping-term   m    ralt)
+
+  ;; Further right
   ,    (t! nomod ,)
   .    (t! nomod .)
   /    (t! nomod /)
@@ -240,12 +282,14 @@
   spc (t! hrm      $tapping-term   spc @arrows-mouse)
 )
 
-(deflayermap alt-tab-layer
-  tab tab
-  ` esc
-  1 esc
-  j lsft
-  f lsft
+(deflayermap tab-switch-layer
+  tab (tap-hold 200 200 tab lsft)
+  [   (tap-hold 200 200 tab lsft)
+  w   S-tab
+  o   S-tab
+  esc esc
+  ` esc 1 esc
+  - esc = esc
 )
 
 (defalias
@@ -259,8 +303,8 @@
 (defalias esc  (multi esc @L0)) ;; tap esc to exit custom layouts
 
 (defvirtualkeys
-  L1          (layer-while-held layout-IPA)
-  L2          (layer-while-held layout-cyrillic)
+  L1          XX ;;(layer-while-held layout-IPA)
+  L2          XX ;;(layer-while-held layout-cyrillic)
   ;; lock-arrows (layer-while-held arrows-right)
   ;; lock-mouse  (layer-while-held mouse)
   ;; lock-num    (layer-while-held num)
@@ -279,7 +323,7 @@
 
 (defalias
   arrows (multi
-    (multi (layer-while-held arrows-left) (layer-while-held arrows-right))
+    (multi (layer-while-held symbols-left) (layer-while-held arrows-right))
   )
   mouse  (multi
     (layer-while-held mouse)
@@ -299,28 +343,41 @@
 )
 
 
-(defchords chord-arrows-i $chord-timeout
+(defchords chord-arrows-middle $chord-timeout
   (j) @←
   (i) @↑
-  (k) @↓
   (o) @→
-  (u) @bspc
-  (l) @del
-  ([) lctl
+  ([) rsft
+
+  (i j) @bspc
+  (i o) @del
+  (j o) ret
+  (o [) tab
+  (i [) S-tab
 
   (j i o) lrld
-
-  ([ i) @☸↑
-  ([ k) @☸↓
-  ([ j) @C←
-  ([ o) @C→
-  ([ u) @Cbspc
-  ([ l) @Cdel
-  (k l) ret
-  
 )
 
-(deflayermap arrows-left
+(defchords chord-arrows-lower $chord-timeout
+  (m) XX
+  (k) @↓
+  (l) XX
+  (m k) @bspc
+  (k l) @del
+  (m l) ret
+)
+(defchords chord-arrows-upper $chord-timeout
+  (u) home
+  (8) XX
+  (9) end
+  (-) lalt
+  (u 8) pgup
+  (8 9) pgdn
+  (u 9) XX
+  (9 -) esc
+)
+
+(deflayermap symbols-left
   q (t! nomod \)
   w (t! lhrm  $tapping-term  - lalt)
   e (t! lhrm  $tapping-term  = lctl)
@@ -334,28 +391,34 @@
   z C-z  x C-x  c C-c  v C-v
 )
 
+(defalias arrows-right (layer-while-held arrows-right))
 (deflayermap arrows-right
-  y C-y
-  u (chord chord-arrows-i u)
-  i (chord chord-arrows-i i)
-  o (chord chord-arrows-i o)
-  j (chord chord-arrows-i j)
-  k (chord chord-arrows-i k)
-  l (chord chord-arrows-i l)
-
-  1 S-1 2 S-2 3 S-3 4 S-4 5 S-5 6 S-6 7 S-7 8 S-8
-  9 (fork (fork S-9 S-[ (nop1)) (fork (unmod (sft) [) , (nop1)) (sft))
-  0 (fork (fork S-0 S-] (nop1)) (fork (unmod (sft) ]) . (nop1)) (sft))
   
+  u (chord chord-arrows-upper u)
+  8 (chord chord-arrows-upper 8)
+  9 (chord chord-arrows-upper 9)
+  - (chord chord-arrows-upper -)
+  0 XX
+
+  i (chord chord-arrows-middle i)
+  o (chord chord-arrows-middle o)
+  j (chord chord-arrows-middle j)
+  [ (chord chord-arrows-middle [)
   p XX
-  h tab
-  - (t!   hrm   $tapping-term  esc rsft)
-  = esc
-  ` esc
-  [ (chord chord-arrows-i [)
-  \ @*TeX
-  n @btn1 m @btn2 , @*IPA
+
+  m (chord chord-arrows-lower m)
+  k (chord chord-arrows-lower k)
+  l (chord chord-arrows-lower l)
+  ' rctl
+  ; XX
+  
+  y C-y
+  h XX
+  n XX
+
+  , XX . XX \ XX
   spc (tap-hold 200 200 spc sft)
+  ralt nop1
 )
 
 (deflayermap mouse
