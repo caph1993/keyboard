@@ -35,9 +35,9 @@
 ;; )
 ;; QWERTY -> COLEMAK-DH
 (defalias
-  q q  w w  e f  r p  t b    y j  u l  i u  o y  p ;
+  q q  w w  e f  r p  t b    y j  u l  i u  o y  p bspc
   a a  s r  d s  f t  g g    h m  j n  k e  l i  ; o
-  z z  x x  c c  v d  b v    n k  m h  , ,  . .  / /
+  z z  x x  c c  v d  b v    n k  m h  , ,  . .  / ret
 )
 
 
@@ -291,9 +291,12 @@
   (e)   (t! nomod  S-[)
   (r)   (t! nomod  S-])
   (t)   (t! nomod  S-8)
+
   (q w) (t! nomod S-=)
   (w e) (t! nomod =)
-  (e r) (t! nomod XX)
+  (e r) (t! nomod ;)
+  
+  (q e) (t! nomod XX)
   (w r) (t! nomod S-5)
 )
 (defchords chord-symbols-left-a $chord-timeout
@@ -302,21 +305,27 @@
   (d)   (t!  lhrm  $tapping-term  S-9  lctl)
   (f)   (t!  lhrm  $tapping-term  S-0  lsft)
   (g)   (t! nomod  S--)
+
   (a s) (t! nomod `)
   (s d) (t! nomod S-2)
   (d f) (t! nomod S-;)
+
+  (a d) (t! nomod S-`)
   (s f) (t! nomod S-3)
 )
 (defchords chord-symbols-left-z $chord-timeout
-  (z)   (t! nomod  \)
-  (x)   (t! nomod  S-4)
+  (z)   (t! nomod  /)
+  (x)   (t! nomod  \)
   (c)   (t! nomod  [)
   (v)   (t! nomod  ])
   (b)   (t! nomod  XX)
+
   (z x) (t! nomod S-6)
   (x c) (t! nomod S-\)
   (c v) (t! nomod S-7)
-  (c b) (t! nomod S-`)
+
+  (z c) (t! nomod S-4)
+  (c b) (t! nomod S-1)
 )
 (deflayermap symbols-left
   q (chord chord-symbols-left-q q)

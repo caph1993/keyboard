@@ -39,4 +39,4 @@ exit $A1_EXIT_CODE
 B1=""$COMMAND" --cfg "$BACKUP_FILE""
 B="(echo \"BACKUP: '$B1'\"; eval '$B1')"
 
-echo "$CONFIG_FILE" | entr -r sh -c "$A || $B"
+echo "$CONFIG_FILE" | entr -n -r sh -c "$A || $B"
