@@ -199,11 +199,6 @@
 
   (' spc)   @mouse
 )
-(defalias 
-  alt-tab-switcher (multi lalt (macro tab) (layer-while-held disabled) (layer-while-held tab-switch-layer))
-  ctl-tab-switcher (multi lctl (macro tab) (layer-while-held disabled) (layer-while-held tab-switch-layer))
-  tab-switcher (fork @alt-tab-switcher @ctl-tab-switcher (ctl))
-)
 (deflayermap (base)
   ;; Row of F keys
   esc @esc
@@ -282,11 +277,16 @@
   spc (t! hrm      $tapping-term   spc @arrows-mouse)
 )
 
+(defalias 
+  alt-tab-switcher (multi lalt (macro tab) (layer-while-held disabled) (layer-while-held tab-switch-layer))
+  ctl-tab-switcher (multi lctl (macro tab) (layer-while-held disabled) (layer-while-held tab-switch-layer))
+  tab-switcher (fork @alt-tab-switcher @ctl-tab-switcher (ctl))
+)
 (deflayermap tab-switch-layer
   tab (tap-hold 200 200 tab lsft)
   [   (tap-hold 200 200 tab lsft)
-  w   S-tab
-  o   S-tab
+  caps   S-tab
+  '      S-tab
   esc esc
   ` esc 1 esc
   - esc = esc

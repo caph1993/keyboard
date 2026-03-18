@@ -115,15 +115,27 @@
   (  o) (t! nomod @o)
   (i o) bspc
 )
+(defchords chord-main-right-middle $chord-timeout
+  (j)    (t! rhrm   $tapping-term   @j    rsft)
+  (k)    (t! rhrm   $tapping-term   @k    rctl)
+  (l)    (t! rhrm   $tapping-term   @l    lalt)
+  (;)    (t! hrm    $tapping-term   @;    lsft)
+
+  (j k)  bspc
+  (k l)  del
+  (j l)  ret
+  (l ;)  tab
+)
 (defchords chords-spc $chord-timeout
 
   (q)   (t! lhrm   $tapping-term   @q    esc)
   (g)   (t! rhrm   $tapping-term  @g lmet)
   (p)   (t! rhrm   $tapping-term  @p  @FKeys)
 
-  (a)   (t! lhrm   $tapping-term   @a    @arrows-mouse)
+  (a)   (t! lhrm   $tapping-term   @a    lsft)
+
+  (u)   (tap-hold 200 600 (t! nomod @u) @*TeX)
   (h)   (t! nomod @h)
-  (;  )   (t! rhrm    $tapping-term   @;     (multi nop1 (layer-while-held disabled) (layer-while-held spc-arrows)))
   (n)    (t! rhrm   $tapping-term   @n    ralt)
   (m)    (t! nomod @m)
   (,)    (t! nomod @,)
@@ -131,13 +143,13 @@
   (/)    (t! rhrm   $tapping-term  @/  @numbers)
   (, .)   ret
   (  spc) (t! hrm    $tapping-term   spc @arrows-mouse)
-  (; spc) @mouse 
-  (m spc) @bspc
-  (. spc) @del
-  (/ spc) @numbers
-  (p spc) @FKeys
-  (h spc) tab
-  (q spc) esc
+  ;; (; spc) @mouse
+  ;; (m spc) @bspc
+  ;; (. spc) @del
+  (u spc) @FKeys
+  (h spc) @mouse 
+  (n spc) @numbers
+  ;; (q spc) esc
   (g spc) (multi lmet spc)
   (a spc) (multi lalt (macro tab) (layer-while-held disabled) (layer-while-held alt-tab-layer))
 )
@@ -152,7 +164,7 @@
   t    (t! nomod @t)
 
   y    (t! nomod @y)
-  u    (tap-hold 200 600 (t! nomod @u) @*TeX)
+  u    (chord chords-spc u)
   i    (chord chord-io-bspc i)
   o    (chord chord-io-bspc o)
   p    (chord chords-spc p)
@@ -165,11 +177,11 @@
   g    (chord chords-spc g)
   
   h    (chord chords-spc h)
-  j    (t! rhrm   $tapping-term   @j    rsft)
-  k    (t! rhrm   $tapping-term   @k    rctl)
-  l    (t! rhrm   $tapping-term   @l    lalt)
-  ;    (chord chords-spc ;)
-  
+  j    (chord chord-main-right-middle j)
+  k    (chord chord-main-right-middle k)
+  l    (chord chord-main-right-middle l)
+  ;    (chord chord-main-right-middle ;)
+
   ;; Row of z
   z    (t! lhrm   $tapping-term   @z    lsft)  ;; because shift is there in large keyboard
   v    (t! nomod @v)
@@ -230,24 +242,32 @@
 ))
 
 
-
-
-(defchords chord-arrows-k $chord-timeout
+(defchords chord-arrows-right-middle $chord-timeout
   (j) @←
   (k) @↑
   (l) @→
-  
-  (m) @bspc
-  (,) @↓
-  (.) @del
+  (;) lsft
 
-  (k j) @C←
-  (k l) @C→
-  (k m) @Cbspc
-  (k .) @Cdel
-
+  (j k)  bspc
+  (k l)  del
+  (j l)  ret
+  (l ;)  tab 
   (j k l) lrld
 )
+(defchords chord-arrows-right-bottom $chord-timeout
+  (m) XX
+  (,) @↓
+  (.) XX
+  (/) lctl
+
+  (m ,)  bspc
+  (, .)  del
+  (m .)  ret
+  (. /)  tab 
+  (m , .) lrld
+)
+
+
 (deflayermap arrows-right
 
   y C-y
@@ -257,16 +277,16 @@
   p esc
 
   h tab
-  j (chord chord-arrows-k j)
-  k (chord chord-arrows-k k)
-  l (chord chord-arrows-k l)
-  ; XX
+  j (chord chord-arrows-right-middle j)
+  k (chord chord-arrows-right-middle k)
+  l (chord chord-arrows-right-middle l)
+  ; (chord chord-arrows-right-middle ;)
 
   n (fork ret   🖰1   (nop1))
-  m (chord chord-arrows-k m)
-  , (chord chord-arrows-k ,)
-  . (chord chord-arrows-k .)
-  / @numbers
+  m (chord chord-arrows-right-bottom m)
+  , (chord chord-arrows-right-bottom ,)
+  . (chord chord-arrows-right-bottom .)
+  / (chord chord-arrows-right-bottom /)
   
   spc (tap-hold 200 200 spc @arrows)
 )
