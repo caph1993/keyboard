@@ -11,81 +11,22 @@
   ;; "Intel HID events"
   ;; "Intel HID 5 button array"
   linux-continue-if-no-devs-found yes
-  danger-enable-cmd yes
   movemouse-inherit-accel-state yes
   movemouse-smooth-diagonals yes
   sequence-input-mode visible-backspaced ;; shows the sequence as it is typed
   ;; sequence-input-mode hidden-delay-type ;; hides while typing. Outputs if invalid
   sequence-timeout 8000 ;; 8 seconds maximum between key presses in sldr sequence
   log-layer-changes no        ;; no logging
+  concurrent-tap-hold yes
+  process-unmapped-keys no
 )
-
-;; My natural right hand position when typing text is the following:
-;; index finger on the joint (J,N,M)
-;; middle finger on the (I)
-;; anular finger on the (O)
-;; pinky finger on the ([)
-;; thumb finger on the laptop, below (ralt) and unable to reach it comfortably, but with the tip over the (space bar)
-
-;; My natural right hand position when typing text is the following:
-;; index finger on (f)
-;; middle finger on the joint (r,4)
-;; anular finger on the joint (3,e)
-;; pinky finger on the joint (1,tab,q)
-;; thumb finger symmetric to the left, below (lalt) unable to reach it comfortably, but with the tip over the (space bar)
-
-;; jiko
-;; erdf
-;; 
-;; Activate with (q hold then w) deactivate with (q)
-;; Activate with ([ hold then p) deactivate with ([)
-;; backspace with (t) and (u), with the thumb
-;; ctrl with (space bar), with the thumb
-;; alt with (lalt) and (ralt), with the thumb
-;; @fn with (rctl) and (super) with the thumb
-;; 
-;; shift with (w) and (p), with the pinky
-;; tab with (g) and (h)
-;; 
-;; @enter_navigation with (b)
-;; Shortcuts ctrl c v x z y.
-
-;; New ideas (2024-08-03):
-;; arrows and mouse will be separated conceptually, but mouse and scroll will be together.
-;; caps will only activate mouse functionality and the number 3 will activate arrows.
-;; locking functionality only for: arrows-lock and mouse-lock. scroll lock is not needed and adds complexity.
-;; unlocking unlocks all locks
-;; hold caps will hold the mouse layer
-;; hold [, hold = and hold 3 will hold the arrows layer
-;; tap caps, tap [, tap = and tap 3 will exit all layers if any is active. If not, [, = and 3 will tap the corresponding key. To tap caps, fn caps is needed.
-;; double tap caps locks the mouse layer. tap caps unlocks it.
-;; double tap ralt locks the mouse layer. tap ralt unlocks it.
-;; scroll can be accessed by holding [ in mouse mode. tapping [ will not produce anything.
-;; finally, arrows can be locked by taping - or p immediately after holding 3, = or [.
-
-
-;; New ideas (2026-02-08):
-;; Home row mods.
-
-
-;; (deflayer main
-;;   @esc _   _    _   _    _   _    _   _    _  _    _    _   _   @del 
-;;   @`    _    @2   @3   _    _    @6   _    _    _    _    _    @= @bspc 
-;;   @tab   _    _    _    _    _    _    _    _    _    _    @[   _ _ 
-;;   @caps   _    _    _    _    _    _    _    _    _    _    _    _  
-;;   _        _    _    _    _    _    _    _    _    _    _        _   
-;;   _      _    @lalt         _               _    _    @←   @↑ @↓   @→   
-;; )
-
 
 
 (defvar
   ;; timings in ms using ZMK-like names
-  one-shot-timeout 60000                 ;; 60 seconds. Bonkers, I know…
-  tapping-term 300                       ;; A higher number allows for one handed modded keys reducing the chance of false-positives when typing fast
+  tapping-term 250   ;; A higher number allows for one handed modded keys reducing the chance of false-positives when typing fast
   quick-tap-ms 200                       ;; same as ZMK ($tap-repress-timeout in Kanata docs)
   require-prior-idle 55                 ;; same as ZMK (not used in vanilla kanata, but used as a workaround in this confit)  
-  combo-timeout 60                       ;; same as ZMK
   
   ;; keys for tap-hold-release-tap-keys-release templates
   left-side-keys   (r t s d g z x c v b) ;; these keys will always make the precedent same hand tap-hold-release-tap-keys-release output tap. B is missing because I, sometimes, alt finger it
@@ -94,17 +35,11 @@
   home-row-right-keys (j i o p ')        ;; home row mods - these will output a tap if they're released after the first key
 )
 (defvirtualkeys fast_typing_state XX)
-(deftemplate nomod (tap)
-  (multi
-    (fork
-       (hold-for-duration 55 fast_typing_state)
-      XX
-      (lctl rctl lalt ralt lmet rmet)
-    )
-    $tap
-  )
-)
-(deftemplate hrm (tappingterm tap-key hold-key)
+(deftemplate nomod (tap) (multi
+  $tap (fork (hold-for-duration $require-prior-idle fast_typing_state) XX (lctl rctl lalt ralt lmet rmet))
+))
+
+(deftemplate hrm* (tappingterm tap-key hold-key)
   (switch
     ((input virtual fast_typing_state)) (t! nomod $tap-key) break
     () (tap-hold $quick-tap-ms $tappingterm
@@ -113,7 +48,7 @@
        ) break
   )
 )
-(deftemplate hrm-sided (tappingterm tap-key hold-key same-side-keys home-row-keys)
+(deftemplate hrm*-sided (tappingterm tap-key hold-key same-side-keys home-row-keys)
   (switch
     ((input virtual fast_typing_state)) (t! nomod $tap-key) break
     () (tap-hold-release-tap-keys-release $quick-tap-ms $tappingterm
@@ -123,11 +58,20 @@
        ) break
   )
 )
-(deftemplate rhrm (tappingterm tap-key hold-key)  ;; right hand mods
-  (t! hrm-sided $tappingterm $tap-key $hold-key $right-side-keys $home-row-right-keys)
+(deftemplate rhrm* (tappingterm tap-key hold-key)  ;; right hand mods
+  (t! hrm*-sided $tappingterm $tap-key $hold-key $right-side-keys $home-row-right-keys)
 )
-(deftemplate lhrm (tappingterm tap-key hold-key)  ;; left hand mods
-  (t! hrm-sided $tappingterm $tap-key $hold-key $left-side-keys $home-row-left-keys)
+(deftemplate lhrm* (tappingterm tap-key hold-key)  ;; left hand mods
+  (t! hrm*-sided $tappingterm $tap-key $hold-key $left-side-keys $home-row-left-keys)
+)
+(deftemplate lhrm (tap-key hold-key)  ;; left hand mods
+  (t! hrm*-sided $tapping-term $tap-key $hold-key $left-side-keys $home-row-left-keys)
+)
+(deftemplate rhrm (tap-key hold-key)  ;; right hand mods
+  (t! hrm*-sided $tapping-term $tap-key $hold-key $right-side-keys $home-row-right-keys)
+)
+(deftemplate hrm (tap-key hold-key)  ;; mods on both hands
+  (t! hrm* $tapping-term $tap-key $hold-key)
 )
 
 ;; https://github.com/jtroo/kanata/discussions/1656#discussioncomment-14382030
@@ -144,109 +88,80 @@
 (defvar
   chord-timeout 50
 )
-(defchords chord-sd-tab $chord-timeout
-  (s  ) (t! nomod s)
-  (  d) (t! nomod d)
-  (s d) tab
-)
-(defchords chord-kl-ret $chord-timeout
-  (k  ) (t! nomod k)
-  (  l) (t! nomod l)
-  (k l) ret
-)
-(defchords chord-90-bspc $chord-timeout
-  (9  ) (t! nomod 9)
-  (  0) (t! nomod 0)
-  (9 0) (fork bspc (macro S-9 S-0) (sft))
-)
-(defchords chord-23-esc $chord-timeout
-  (2  ) (t! nomod 2)
-  (  3) (t! nomod 3)
-  (2 3) @esc
-)
-(defchords chords-spc $chord-timeout
-  ([  )   (t! hrm    $tapping-term   [     (multi nop1 (layer-while-held disabled) (layer-while-held spc-arrows)))
-  (spc)   (t! hrm    $tapping-term   spc @arrows-mouse)
-  (tab)   (t!  hrm   $tapping-term   tab   @arrows-mouse)
-  
-  ([ spc) @mouse 
-  (tab spc) (multi lalt (macro tab) (layer-while-held disabled) (layer-while-held alt-tab-layer))
+
+(defchordsv2
+  (m l  ) ret     $chord-timeout all-released (symbols-right)
+  (m k  ) @bspc   $chord-timeout all-released (symbols-right)
+  (i j o) lrld    $chord-timeout all-released (symbols-right)
+
+  ([ m   ) @mouse                   $chord-timeout all-released ()
+  (tab m ) @mouse                   $chord-timeout all-released ()
+  ([ ralt) @ralt-cycler             $chord-timeout all-released ()
+  ([ p   ) @*TeX                    $chord-timeout all-released ()
+  ([ n   ) @num-lock                $chord-timeout all-released ()
 )
 
 (deflayermap (base)
-  ;; Row of F keys
-  esc @esc
+  ;; Middle
+  tab  (t! hrm   tab @arrows-mouse)
+  q    (t! lhrm   q    lsft) ;; only when working on bed
+  w    (t! lhrm   w    lalt)
+  e    (t! lhrm   e    lctl)
+  f    (t! lhrm   f    lsft)
+  g    (t! lhrm   g    lmet)
+  h    (t! nomod h)
+  j    (t! rhrm   j    rsft)
+  i    (t! rhrm   i    rctl)
+  o    (t! rhrm   o    lalt)
+  p    (t! nomod  p)
+  [    (t! hrm   [   @arrows-mouse)
+  ]    (t! nomod ])
+  \    (tap-hold 200 200 (t! nomod \) @*TeX)
 
-  ;; Row of numbers
-  2    (chord chord-23-esc 2)
-  3    (chord chord-23-esc 3)
-  9    (chord chord-90-bspc 9)
-  0    (chord chord-90-bspc 0)
-  -    (t! rhrm   $tapping-term   -    rsft)
+  ;; Bottom
+  caps (tap-hold 100 100 caps @symbols-right)
+  a    (t! nomod a)
+  s    (t! lhrm s @symbols-right)
+  d    (t! lhrm d @arrows-mouse)
+  k    (t! nomod k)
+  l    (t! nomod l)
+  ;    (t! nomod ;)
+  ;; '    (t! rhrm   '    @num-FKeys)
 
-  ;; Row of qwe
-  tab  (chord chords-spc tab)
-  ;; q    (t! lhrm- $tot 350 q    lmet)
-  w    (t! lhrm   $tapping-term   w    lalt)
-  e    (t! lhrm   $tapping-term   e    lctl)
+  ;; Top
   r    (t! nomod r)
   t    (t! nomod t)
   y    (t! nomod y)
   u    (t! nomod u)
-  i    (t! rhrm   $tapping-term   i    rctl)
-  o    (t! rhrm   $tapping-term   o    lalt)
-  p    (t! rhrm   $tapping-term   p    ralt)
-  ;; p    (t! rhrm- $tot 350 p    lmet)
-  [    (chord chords-spc [)
-  ]    (t! nomod ])
+  -    (t! rhrm   -    rsft)
+  `    (t! hrm    `    (multi @symbols-right))
+  1    (t! hrm    1    (multi lsft @symbols-right))
+  2    (t! hrm    2    (multi nop1 @symbols-right))
+  3    (t! hrm    3    (multi lsft nop1 @symbols-right))
 
-  ;; Row of asd
-  caps (tap-hold 100 100 caps lctl)
-  a    (t! nomod a)
-  s    (chord chord-sd-tab s)
-  d    (chord chord-sd-tab d)
-  f    (t! lhrm   $tapping-term   f    lsft)
-  g    (t! nomod g)
-  h    (t! nomod h)
-  j    (t! rhrm   $tapping-term   j    rsft)
-  k    (chord chord-kl-ret k)
-  l    (chord chord-kl-ret l)
-  ;    (t! nomod ;)
-  '    (t! rhrm   $tapping-term   '    @num-FKeys)
-  
-  ;; Row of z
+  ;; Far bottom
   z    (t! nomod z)
-  x    (t! nomod x)
-  c    (t! lhrm   $tapping-term   c    ralt)
+  x    (t! nomod x) 
+  c    (t! nomod c)
   v    (t! nomod v)
   b    (t! nomod b)
   n    (t! nomod n)
-  m    (t! rhrm   $tapping-term   m    ralt)
+  m    (t! nomod m)
   ,    (t! nomod ,)
   .    (t! nomod .)
   /    (t! nomod /)
 
-
+  ;; Far top
+  esc @esc
   F1   (tap-hold 200 600 F1  @L1)
   F12  (tap-hold 200 600 F12 lrld)
+  spc  (t! hrm   spc @arrows-mouse)
 
-  ;; spc  (tap-hold 200 200 spc nop2) ;; nop2=layer-lock
-
-  ;; row of space
-  spc  (chord chords-spc spc)
   left @← up @↑ down @↓ right @→
 )
-(deflayermap spc-arrows
-  spc (t! hrm      $tapping-term   spc @arrows-mouse)
-)
 
-(deflayermap alt-tab-layer
-  tab tab
-  ` esc
-  1 esc
-  j lsft
-  f lsft
-)
+(defalias ralt-cycler (multi (release-key ralt) lalt (macro tab) (layer-while-held ralt-cycler)))
+(deflayermap ralt-cycler [ tab ' S-tab 0 esc - esc = esc ] esc  j @← i @↑ k @↓ o @→)
 
 (defalias
   L0 (on-press press-vkey L0)
@@ -254,7 +169,7 @@
   ;; unlock      (on-press press-vkey unlock)
   ;; lock-arrows (on-press press-vkey lock-arrows)
   ;; lock-mouse  (on-press press-vkey lock-mouse)
-  ;; lock-num    (on-press press-vkey lock-num)
+  ;; num-lock    (on-press press-vkey num-lock)
 )
 (defalias esc  (multi esc @L0)) ;; tap esc to exit custom layouts
 
@@ -263,7 +178,7 @@
   L2          (layer-while-held layout-cyrillic)
   ;; lock-arrows (layer-while-held arrows-right)
   ;; lock-mouse  (layer-while-held mouse)
-  ;; lock-num    (layer-while-held num)
+  num-lock    (layer-while-held symbols-right)
 )
 (defvirtualkeys
   L0 (multi
@@ -273,89 +188,49 @@
   ;; unlock (multi
   ;;   (on-press release-vkey lock-arrows)
   ;;   (on-press release-vkey lock-mouse)
-  ;;   (on-press release-vkey lock-num)
+  ;;   (on-press release-vkey num-lock)
   ;; )
 )
 
 (defalias
-  arrows (multi
-    (multi (layer-while-held arrows-left) (layer-while-held arrows-right))
-  )
-  mouse  (multi
-    (layer-while-held mouse)
-  )
-  num  (multi
-    (layer-while-held num)
-  )
+  arrows (layer-while-held arrows-right)
+  mouse  (layer-while-held mouse)
+  symbols-right (layer-while-held symbols-right)
+  arrows-mouse (multi @arrows (fork XX @mouse (ralt)))
 )
 
-(defalias arrows-mouse (multi
-  @arrows
-  (fork XX @mouse (ralt))
-))
-(defalias num-FKeys (multi
-  @num
-  (fork XX (layer-while-held FKeys) (lalt)))
-)
-
-
-(defchords chord-arrows-i $chord-timeout
+(include "configs/mouse.kbd")
+(defchords chord-arrows $chord-timeout
+  (lctl) lctl
   (j) @←
   (i) @↑
   (k) @↓
   (o) @→
   (u) @bspc
   (l) @del
-  ([) lctl
-
-  (j i o) lrld
-
-  ([ i) @☸↑
-  ([ k) @☸↓
-  ([ j) @C←
-  ([ o) @C→
-  ([ u) @Cbspc
-  ([ l) @Cdel
-  (k l) ret
-  
 )
-
-(deflayermap arrows-left
-  q (t! nomod \)
-  w (t! lhrm  $tapping-term  - lalt)
-  e (t! lhrm  $tapping-term  = lctl)
-  r (t! nomod ')
-  a (t! nomod ,)
-  s (t! nomod .)
-  d (t! nomod /) 
-  f (t! lhrm  $tapping-term  ; lsft)
-  g (t! nomod /)
-
-  z C-z  x C-x  c C-c  v C-v
-)
-
 (deflayermap arrows-right
   y C-y
-  u (chord chord-arrows-i u)
-  i (chord chord-arrows-i i)
-  o (chord chord-arrows-i o)
-  j (chord chord-arrows-i j)
-  k (chord chord-arrows-i k)
-  l (chord chord-arrows-i l)
+  u (chord chord-arrows u)
+  i (chord chord-arrows i)
+  o (chord chord-arrows o)
+  j (chord chord-arrows j)
+  k (chord chord-arrows k)
+  l (chord chord-arrows l)
 
-  1 S-1 2 S-2 3 S-3 4 S-4 5 S-5 6 S-6 7 S-7 8 S-8
-  9 (fork (fork S-9 S-[ (nop1)) (fork (unmod (sft) [) , (nop1)) (sft))
-  0 (fork (fork S-0 S-] (nop1)) (fork (unmod (sft) ]) . (nop1)) (sft))
+  8 (fork C-z S-8 (sft))
+  9 (fork C-c S-9 (sft))
+  0 (fork C-v S-0 (sft))
+  - (fork C-x S-- (sft))
+  ralt nop1
+  lalt nop1
   
   p XX
-  h tab
-  - (t!   hrm   $tapping-term  esc rsft)
-  = esc
-  ` esc
-  [ (chord chord-arrows-i [)
-  \ @*TeX
-  n @btn1 m @btn2 , @*IPA
-  spc (tap-hold 200 200 spc sft)
+  lctl (chord chord-arrows lctl)
+  tab  (chord chord-arrows lctl)
+  n    (fork ret   🖰1 (nop1))
+  m    XX
+  spc  (tap-hold 200 200 spc sft)
 )
 
 (deflayermap mouse
@@ -363,44 +238,67 @@
   n 🖰1    m 🖰2
   x C-x   z C-z  c C-c    v C-v    y C-y
   u XX
-  [ nop1
-  ] XX
+  tab  nop1
+  [    nop1
   lalt nop2 ;; slow movements
   rctl nop2 ;; slow movements
+  ralt nop1
 )
 
-(deflayermap num
-  q (t! lhrm    $tapping-term  1 lmet)
-  w (t! lhrm    $tapping-term  2 lalt)
-  e (t! lhrm    $tapping-term  3 lctl)
-  f (t! lhrm    $tapping-term  4 lsft)
-  g (t! nomod 5)
-  h (t! nomod 6)
-  j (t! rhrm    $tapping-term  7 rsft)
-  i (t! rhrm    $tapping-term  8 rctl)
-  o (t! rhrm    $tapping-term  9 lalt)
-  p (t! rhrm    $tapping-term  0 ralt)
-  m '  k [  l ]  ; \
-  a \  s `  d -  v =
+
+;; nop0 is the "go to extreme" button <=>l
+;; nop3 is a "ctl" button. All ctl buttons trigger nop3, except the tab key for which certain keys are unmoded.
+;; Repeated arrow means ctrl+arrow (word jump). Only defined for left and right.
+(defalias ↑    (fork up   @☸↑ (nop1)))
+(defalias ↓    (fork down @☸↓ (nop1)))
+(defalias ←    (fork left    (tap-hold 200 500 C-left  (macro (unmod home))) (lctl rctl)))
+(defalias →    (fork right   (tap-hold 200 500 C-right (macro (unmod end ))) (lctl rctl)))
+
+(defalias Xbspc (macro (unmod lsft home) (unmod bspc)))
+(defalias Xdel  (macro (unmod lsft end) (unmod del)))
+(defalias Cbspc (tap-hold 200 600 C-bspc  @Xbspc))
+(defalias Cdel  (tap-hold 200 600 C-del   @Xdel))
+(defalias del   (fork del    @Cdel  (lctl rctl)))
+(defalias bspc  (fork bspc   @Cbspc (lctl rctl)))
+
+
+
+(defalias
+  ,; (fork ,   (unmod ;) (sft rsft))
+  .: (fork .   S-;       (sft rsft))
+  << (fork S-9 S-,       (sft rsft))
+  >> (fork S-0 S-.       (sft rsft))
 )
-(deflayermap FKeys
-  q (t! lhrm    $tapping-term  (fork F1  @fn-F1  (nop1)) lmet)
-  w (t! lhrm    $tapping-term  (fork F2  @fn-F2  (nop1)) lalt)
-  e (t! lhrm    $tapping-term  (fork F3  @fn-F3  (nop1)) lctl)
-  f (t! lhrm    $tapping-term  (fork F4  @fn-F4  (nop1)) lsft)
-  g (t! nomod         (fork F5  @fn-F5  (nop1)))
-  h (t! nomod         (fork F6  @fn-F6  (nop1)))
-  j (t! rhrm    $tapping-term  (fork F7  @fn-F7  (nop1)) rsft)
-  i (t! rhrm    $tapping-term  (fork F8  @fn-F8  (nop1)) rctl)
-  o (t! rhrm    $tapping-term  (fork F9  @fn-F9  (nop1)) lalt)
-  p (t! rhrm    $tapping-term  (fork F10 @fn-F10 (nop1)) ralt)
-  r (t! nomod         (fork F11 @fn-F11 (nop1)))
-  u (t! nomod         (fork F12 @fn-F12 (nop1)))
-  t PrintScreen
-  y PrintScreen
-  ralt (multi nop1 (layer-while-held FKeys)) ;; fn keys
-  spc (tap-hold 200 200 spc (layer-while-held FKeys))
+(defalias
+  num-lock (switch
+    ((input virtual num-lock)) (on-press release-vkey num-lock) break
+    () (on-press press-vkey num-lock) break
+))
+(deflayermap symbols-right
+  m     (fork  1   @,; (nop1))
+  k     (fork  2   @.: (nop1))
+  l     (fork  3   /   (nop1))
+  j     (fork  4   @<< (nop1))
+  i     (fork  5   @>> (nop1))
+  o     (fork  6   -   (nop1))
+  u     (fork  7   [   (nop1))
+  9     (fork  8   ]   (nop1))
+  0     (fork  9   '   (nop1))
+  =     (fork  0   =   (nop1))
+  ,     (fork  0   =   (nop1))
+  h     (fork  `   \   (nop1))
+  ; XX
+  8 XX
+
+  w      nop1
+  lalt   nop1
+  ralt   nop1
+  n      ret
+
+  [     (multi @num-lock @arrows-mouse)
 )
+
+
 (defalias
   ;; names: https://github.com/jtroo/kanata/blob/main/parser/src/keys/mod.rs
   fn-F1 mute
@@ -417,58 +315,20 @@
   fn-F12 end
 )
 
-
-
-;; Reference layers for copy-paste
-(deflayer empty
-  _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
-  _     _    _    _    _    _    _    _    _    _    _    _    _ _   
-  _      _    _    _    _    _    _    _    _    _    _    _    _ _ 
-  _       _    _    _    _    _    _    _    _    _    _    _    _  
-  _        _    _    _    _    _    _    _    _    _    _        _   
-  _      _    _             _               _    _    _    _  _    _    
-)
-(deflayer disabled
-  XX   XX  XX   XX  XX   XX  XX   XX  XX   XX XX   XX   XX  XX  XX 
-  XX    XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX XX  
-  XX     XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX XX 
-  XX      XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX 
-  XX       XX   XX   XX   XX   XX   XX   XX   XX   XX   XX       XX  
-  XX     XX   XX            XX              XX   XX   XX   XX XX   XX   
-)
-(defalias disabled (multi
-  (layer-while-held empty)
-))
-;; Tip. Use: (multi (layer-while-held disabled) (layer-while-held some-layer)) to block all keys but those defined in some-layer
-
-
-(include "configs/sldr.kbd")
+(include "configs/sldr-base.kbd")
+(include "configs/sldr-tex.kbd")
+(include "configs/sldr-ipa.kbd")
+(include "configs/sldr-kbd.kbd")
 (defalias *TeX (multi @*sldr (macro (unicode *) 150 bspc sldr 5 \)))
 (defalias *IPA (multi @*sldr (macro (unicode *) 150 bspc sldr 5 S-`)))
 
+(include "configs/international-layouts.kbd")
 
 ;; ----------------------------------------------------------
 ;; Tab and arrows layer
 ;; ----------------------------------------------------------
 
-(include "configs/mouse.kbd")
 
-;; nop0 is the "go to extreme" button <=>l
-;; nop3 is a "ctl" button. All ctl buttons trigger nop3, except the tab key for which certain keys are unmoded.
-;; Repeated arrow means ctrl+arrow (word jump). Only defined for left and right.
-(defalias ↑    (fork up   @☸↑ (nop1)))
-(defalias ↓    (fork down @☸↓ (nop1)))
-(defalias ←    (fork left home (nop1)))
-(defalias →    (fork right end (nop1)))
-(defalias C←   (fork (tap-hold 200 300 C-left (macro home)) home (nop1)))
-(defalias C→   (fork (tap-hold 200 300 C-right (macro end)) end (nop1)))
-(defalias btn1 (fork ret   🖰1   (nop1)))
-(defalias btn2 (fork @*TeX 🖰2   (nop1)))
-(defalias btn3 (fork ContextMenu   🖰3   (nop1)))
-(defalias bspc  (tap-hold 200 600 bspc   (macro (unmod lsft home) (unmod bspc))))
-(defalias Cbspc (tap-hold 200 600 C-bspc (macro (unmod lsft home) (unmod bspc))))
-(defalias del   (tap-hold 200 600 del    (macro (unmod lsft end ) (unmod del ))))
-(defalias Cdel  (tap-hold 200 600 C-del  (macro (unmod lsft end ) (unmod del ))))
 
 ;; Either there is a bug of a hardware issue when pressing multiple keys (holding three and pressing the fourh): (` = ralt o) works and (` = ralt j) works, but (` = ralt i) and (` = ralt j) don't. The software doesn't detect it at all.
 

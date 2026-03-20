@@ -1,0 +1,102 @@
+
+
+;; https://help.keyman.com/keyboard/kreative_superipa/1.1/kreative_superipa
+;; https://dohliam.github.io/xsampa/
+;; https://open-dict-data.github.io/ipa-lookup/en/?#
+;; https://bennw.github.io/werdel/#infinite
+
+
+(deftemplate ipa4 (normal shift- alt- alt-shift-)
+  (switch 
+    ((and nop4 nop5)) $alt-shift- break
+    ((and nop5))      $alt- break
+    ((and nop4))      $shift- break
+    ()                $normal break
+  )
+)
+(deflayermap layout-IPA
+  lsft nop4
+  rsft nop4
+  ralt nop5
+  a (t! ipa4 a   🔣ɑ  🔣ʰ  🔣◌̺)
+  b (t! ipa4 b   🔣β  🔣ɓ  🔣ʙ)
+  c (t! ipa4 c   🔣ç  🔣◌̜  🔣◌̹)
+  d (t! ipa4 d   🔣ð  🔣ɖ  🔣◌̪)
+  e (t! ipa4 e   🔣ɛ  🔣ɚ  🔣ɝ)
+  f (t! ipa4 f   🔣ɱ  🔣ɗ  🔣ʄ)
+  g (t! ipa4 g   🔣ɣ  XX   🔣ɢ)
+  h (t! ipa4 h   🔣ɥ  🔣ɦ  🔣ʜ)
+  i (t! ipa4 i   🔣ɪ  XX   🔣ɪ̈)
+  j (t! ipa4 j   🔣ɲ  🔣ʝ  🔣ɟ)
+  k (t! ipa4 k   🔣ɬ  🔣ɭ  🔣ɮ)
+  l (t! ipa4 l   🔣ʎ  🔣ɺ  🔣ʟ)
+  m (t! ipa4 m   🔣ɯ  🔣ⁿ  🔣ɰ)
+  n (t! ipa4 n   🔣ŋ  🔣ɳ  🔣ɴ)
+  o (t! ipa4 o   🔣ɔ  🔣ˡ  🔣ʘ)
+  p (t! ipa4 p   🔣ʋ  🔣ɸ  🔣↘)
+  q (t! ipa4 q   🔣ɒ  🔣ˠ  🔣◌̻)
+  r (t! ipa4 r   🔣ʁ  🔣ɹ  🔣ʀ)
+  s (t! ipa4 s   🔣ʃ  🔣ɕ  🔣ʂ)
+  t (t! ipa4 t   🔣θ  🔣ʈ  🔣↗)
+  u (t! ipa4 u   🔣ʊ  XX   🔣ʊ̈)
+  v (t! ipa4 v   🔣ʌ  XX  XX)
+  w (t! ipa4 w   🔣ʍ  🔣ʷ  🔣◌̼)
+  x (t! ipa4 x   🔣χ  🔣ɧ  🔣ħ)
+  y (t! ipa4 y   🔣ʏ  🔣ɠ  🔣ʛ)
+  z (t! ipa4 z   🔣ʒ  🔣ʑ  🔣ʐ)
+  - (t! ipa4 -   XX   🔣‿  🔣◌̠)
+  , (t! ipa4 ,   🔣<  🔣⟨  🔣ʢ)
+  ; (t! ipa4 ;   🔣ː  🔣◌̆  🔣ˑ)
+  . (t! ipa4 .   XX   XX  🔣ʡ)
+  ' (t! ipa4 '   XX   🔣ʼ  🔣◌̈)
+  [ (t! ipa4 [   XX   🔣◌̝  🔣◌̘)
+  ] (t! ipa4 ]   XX   🔣◌̞  🔣◌̙)
+  / (t! ipa4 /    🔣ʔ 🔣ˤ  🔣ʕ)
+  \ (t! ipa4 🔣|  🔣‖ 🔣ǀ  🔣ǁ)
+  ` (t! ipa4 🔣˞  🔣◌̃ 🔣◌̤  🔣◌̰)
+  = (t! ipa4 🔣◌̩  🔣◌̯ 🔣ǂ  🔣◌̟)
+  0 (t! ipa4 🔣◌̥  XX  🔣◌̬ XX)
+  1 (t! ipa4 XX   🔣ꜜ 🔣ǃ XX)
+  2 (t! ipa4 🔣ø  🔣ə 🔣◌̽  🔣ɘ)
+  3 (t! ipa4 🔣ɜ  🔣◌́ 🔣ɞ  🔣◌̋)
+  4 (t! ipa4 🔣ɾ  🔣◌̄ 🔣ɽ  🔣ɻ)
+  5 (t! ipa4 🔣ɫ  🔣◌̀ 🔣◌̴  🔣◌̏)
+  6 (t! ipa4 🔣ɐ  🔣ꜛ 🔣◌̂  🔣◌̌)
+  7 (t! ipa4 🔣ɤ  🔣æ 🔣◌᷈  🔣ɶ)
+  8 (t! ipa4 🔣ɵ  XX  🔣◌᷅  🔣◌᷄)
+  9 (t! ipa4 🔣œ  XX  🔣◌̚ XX)
+)
+;; https://keymap-drawer.streamlit.app/
+
+(deflayermap layout-cyrillic
+  lsft nop4
+  rsft nop4
+  ralt nop5
+  a (t! ipa4 a   🔣а  🔣А  XX)
+  b (t! ipa4 b   🔣б  🔣Б  XX)
+  c (t! ipa4 c   🔣ц  🔣Ц  XX)
+  d (t! ipa4 d   🔣д  🔣Д  XX)
+  e (t! ipa4 e   🔣е  🔣Е  XX)
+  f (t! ipa4 f   🔣ф  🔣Ф  XX)
+  g (t! ipa4 g   🔣г  🔣Г  XX)
+  h (t! ipa4 h   🔣х  🔣Х  XX)
+  i (t! ipa4 i   🔣и  🔣И  XX)
+  j (t! ipa4 j   🔣й  🔣Й  XX)
+  k (t! ipa4 k   🔣к  🔣К  XX)
+  l (t! ipa4 l   🔣л  🔣Л  XX)
+  m (t! ipa4 m   🔣м  🔣М  XX)
+  n (t! ipa4 n   🔣н  🔣Н  XX)
+  o (t! ipa4 o   🔣о  🔣О  XX)
+  p (t! ipa4 p   🔣п  🔣П  XX)
+  q (t! ipa4 q   🔣я  🔣Я  XX)
+  r (t! ipa4 r   🔣р  🔣Р  XX)
+  s (t! ipa4 s   🔣с  🔣С  XX)
+  t (t! ipa4 t   🔣т  🔣Т  XX)
+  u (t! ipa4 u   🔣у  🔣У  XX)
+  v (t! ipa4 v   🔣в  🔣В  XX)
+  w (t! ipa4 w   🔣щ  🔣Щ  XX)
+  x (t! ipa4 x   🔣х  🔣Х  XX)
+  y (t! ipa4 y   🔣ы  🔣Ы  XX)
+  z (t! ipa4 z   🔣з  🔣З  XX)
+  
+)

@@ -1,0 +1,65 @@
+;; Reference layers for copy-paste
+(deflayer empty
+  _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
+  _     _    _    _    _    _    _    _    _    _    _    _    _ _   
+  _      _    _    _    _    _    _    _    _    _    _    _    _ _ 
+  _       _    _    _    _    _    _    _    _    _    _    _    _  
+  _        _    _    _    _    _    _    _    _    _    _        _   
+  _      _    _             _               _    _    _    _  _    _    
+)
+(deflayer disabled
+  XX   XX  XX   XX  XX   XX  XX   XX  XX   XX XX   XX   XX  XX  XX 
+  XX    XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX XX  
+  XX     XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX XX 
+  XX      XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX 
+  XX       XX   XX   XX   XX   XX   XX   XX   XX   XX   XX       XX  
+  XX     XX   XX            XX              XX   XX   XX   XX XX   XX   
+)
+
+
+;; My natural right hand position when typing text is the following:
+;; index finger on the joint (J,N,M)
+;; middle finger on the (I)
+;; anular finger on the (O)
+;; pinky finger on the ([)
+;; thumb finger on the laptop, below (ralt) and unable to reach it comfortably, but with the tip over the (space bar)
+
+;; My natural right hand position when typing text is the following:
+;; index finger on (f)
+;; middle finger on the joint (r,4)
+;; anular finger on the joint (3,e)
+;; pinky finger on the joint (1,tab,q)
+;; thumb finger symmetric to the left, below (lalt) unable to reach it comfortably, but with the tip over the (space bar)
+
+;; jiko
+;; erdf
+;; 
+;; Activate with (q hold then w) deactivate with (q)
+;; Activate with ([ hold then p) deactivate with ([)
+;; backspace with (t) and (u), with the thumb
+;; ctrl with (space bar), with the thumb
+;; alt with (lalt) and (ralt), with the thumb
+;; @fn with (rctl) and (super) with the thumb
+;; 
+;; shift with (w) and (p), with the pinky
+;; tab with (g) and (h)
+;; 
+;; @enter_navigation with (b)
+;; Shortcuts ctrl c v x z y.
+
+;; New ideas (2024-08-03):
+;; arrows and mouse will be separated conceptually, but mouse and scroll will be together.
+;; caps will only activate mouse functionality and the number 3 will activate arrows.
+;; locking functionality only for: arrows-lock and mouse-lock. scroll lock is not needed and adds complexity.
+;; unlocking unlocks all locks
+;; hold caps will hold the mouse layer
+;; hold [, hold = and hold 3 will hold the arrows layer
+;; tap caps, tap [, tap = and tap 3 will exit all layers if any is active. If not, [, = and 3 will tap the corresponding key. To tap caps, fn caps is needed.
+;; double tap caps locks the mouse layer. tap caps unlocks it.
+;; double tap ralt locks the mouse layer. tap ralt unlocks it.
+;; scroll can be accessed by holding [ in mouse mode. tapping [ will not produce anything.
+;; finally, arrows can be locked by taping - or p immediately after holding 3, = or [.
+
+
+;; New ideas (2026-02-08):
+;; Home row mods.

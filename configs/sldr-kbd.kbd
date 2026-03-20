@@ -1,0 +1,30 @@
+
+(t! def-seq \\ (\ \) (macro \ \))
+(t! def-seq \check        (\ c h e c k                 spc) (macro 🔣✓))
+(t! def-seq \wheel        (\ w h e e l                 spc) (macro 🔣☸))
+(t! def-seq \mouse        (\ m o u s e                 spc) (macro 🔣🖱))
+(t! def-seq \mousewheel   (\ m o u s e w h e e l       spc) (macro 🔣☸))
+(t! def-seq \bspc         (\ b s p c                   spc) (macro 🔣⌫))
+(t! def-seq \del          (\ d e l                     spc) (macro 🔣⌦))
+(t! def-seq \upcheck      (\ S-c h e c k               spc) (macro 🔣✔ 🔣✅))
+(t! def-seq \checkbox     (\ c h e c k b o x           spc) (macro 🔣☐ 🔣🗹 🔣🗷 🔣☑ 🔣☒ 🔣❌ 🔣❎ 🔣🗵 🔣⮽ 🔣🗳))
+(t! def-seq \cross        (\ c r o s s                 spc) (macro 🔣✗))
+(t! def-seq \upcross      (\ S-c r o s s               spc) (macro 🔣✘ 🔣🗴 🔣🗶))
+
+;; Reachable keys
+(t! def-seq \minus        (\ m i n u s                 spc) -)
+(t! def-seq \minus-S      (\ m i n u s               S-spc) S--)
+(t! def-seq \underscore   (\ u n d e r s c o r e       spc) S--)
+(t! def-seq \eq           (\ e q                       spc) =)
+(t! def-seq \eq-S         (\ e q                     S-spc) S-=)
+(t! def-seq \plus         (\ p l u s                   spc) S-=)
+(t! def-seq \and          (\ a n d                     spc) S-7)
+(t! def-seq \and-S        (\ a n d                   S-spc) (macro S-7 S-7))
+(t! def-seq \or           (\ o r                       spc) S-\)
+(t! def-seq \or-S         (\ o r                     S-spc) (macro S-\ S-\))
+
+
+(t! def-seq \mute         (\ m u t e                   spc) mute)
+(t! def-seq \unmute       (\ u n m u t e               spc) mute)
+(t! def-seq \next         (\ n e x t                   spc) next)
+(t! def-seq \prev         (\ p r e v                   spc) prev)

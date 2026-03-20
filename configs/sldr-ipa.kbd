@@ -1,0 +1,73 @@
+(t! def-seq \schwa        (\ s c h w a                 spc) (macro 🔣ə))
+
+(t! def-seq ~:            (S-` S-;                     spc) (macro 🔣ː))
+(t! def-seq ~'            (S-` '                       spc) (macro 🔣ˈ))
+(t! def-seq ~''           (S-` S-'                     spc) (macro 🔣ˈ))
+(t! def-seq ~A            (S-` a                       spc) (macro 🔣ʌ))
+(t! def-seq ~ae           (S-` a e                     spc) (macro 🔣æ))
+(t! def-seq ~aw           (S-` a w                     spc) (macro 🔣ɑ))
+(t! def-seq ~B            (S-` b                       spc) (macro 🔣β))
+(t! def-seq ~bh           (S-` b h                     spc) (macro 🔣β))
+(t! def-seq ~c            (S-` c                       spc) (macro 🔣ç)) ;; ich
+(t! def-seq ~D            (S-` d                       spc) (macro 🔣ð))
+(t! def-seq ~dh           (S-` d h                     spc) (macro 🔣ð))
+(t! def-seq ~dz           (S-` d z                     spc) (macro 🔣ʣ))
+(t! def-seq ~dzh          (S-` d z h                   spc) (macro 🔣ʤ))
+
+;; =========================
+;; e-types and rhotic vowels:
+;;   e  --> er (GA), ehr(RP): about, sofa, taken, fr:je --> teacher, doctor, butter
+;;   è  --> èr (GA), èhr(RP): bed, ten, said, fr:crème --> hair, square, care, bear
+;;      --> Er (GA), Ehr(RP): --> her, bird, word, nurse, serve, learn (stressed)
+;;   ee --> ir (GA), ihr(RP): bee --> near, serious, here
+;; =========================
+(t! def-seq ~e            (S-` e                       spc) (macro 🔣ə))   ;; about, sofa, taken, fr:je
+(t! def-seq ~er           (S-` e r                     spc) (macro 🔣ɚ))   ;; GA teacher, butter, doctor (unstressed)
+(t! def-seq ~ehr          (S-` e h r                   spc) (macro 🔣ə (unicode "(") 🔣ɹ (unicode ")")))   ;; RP of er
+(t! def-seq ~è            (S-` RA-e                    spc) (macro 🔣ɛ))   ;; bed, ten, said, fr:crème
+(t! def-seq ~èr           (S-` RA-e r                  spc) (macro 🔣ɛ 🔣ɹ))   ;; GA hair, square, care, bear (AmE)
+(t! def-seq ~èhr          (S-` RA-e h r                spc) (macro 🔣ɛ 🔣ə))   ;; RP of èr
+(t! def-seq ~Er           (S-` S-e r                   spc) (macro 🔣ɝ))   ;; GA bird, word, girl, nurse, serve, learn (stressed)
+(t! def-seq ~Ehr          (S-` S-e h r                 spc) (macro 🔣ɜ 🔣ː))  ;; RP of Er
+(t! def-seq ~ee           (S-` e e                     spc) (macro 🔣i 🔣ː))  ;; see, fleece, machine
+(t! def-seq ~ir           (S-` i r                     spc) (macro 🔣ɪ 🔣ɹ))   ;; GA near, serious, here (AmE)
+(t! def-seq ~ihr          (S-` i h r                   spc) (macro 🔣ɪ 🔣ə))   ;; RP of ihr
+
+(t! def-seq ~g            (S-` g                       spc) (macro 🔣ɣ))
+(t! def-seq ~gh           (S-` g h                     spc) (macro 🔣ɣ))
+(t! def-seq ~h            (S-` h                       spc) (macro 🔣ʰ))
+(t! def-seq ~i            (S-` i                       spc) (macro 🔣ɪ))
+(t! def-seq ~j            (S-` j                       spc) (macro 🔣ʒ)) ;; je, vision
+(t! def-seq ~k            (S-` k                       spc) (macro 🔣ʞ))
+(t! def-seq ~l            (S-` l                       spc) (macro 🔣ʎ))
+(t! def-seq ~lh           (S-` l h                     spc) (macro 🔣ʎ))
+(t! def-seq ~l-           (S-` l -                     spc) (macro 🔣ɫ))
+(t! def-seq ~m            (S-` m                       spc) (macro 🔣ɱ))
+(t! def-seq ~gn           (S-` g n                     spc) (macro 🔣ɳ)) ;; toño
+(t! def-seq ~ñ            (S-` RA-n                    spc) (macro 🔣ɳ)) ;; toño
+(t! def-seq ~ng           (S-` n g                     spc) (macro 🔣ŋ)) ;; singer, con_un_amigo
+(t! def-seq ~ò            (S-` ` o                     spc) (macro 🔣ɔ)) ;; crawl
+(t! def-seq ~ô            (S-` S-6 o                   spc) (macro 🔣ɒ)) ;; palm
+;; (t! def-seq ~ö            (S-` S-6 o                   spc) (macro 🔣ø))
+(t! def-seq ~oe           (S-` o e                     spc) (macro 🔣œ))
+(t! def-seq ~ph           (S-` p h                     spc) (macro 🔣ɸ))
+;; (t! def-seq ~R            (S-` r                       spc) (macro 🔣ɾ ɹ ʁ ʀ))
+(t! def-seq ~r            (S-` r                       spc) (macro 🔣ɾ))
+(t! def-seq ~R            (S-` S-r                     spc) (macro 🔣ʁ))
+(t! def-seq ~rh           (S-` r h                     spc) (macro 🔣ɹ))
+(t! def-seq ~S            (S-` s                       spc) (macro 🔣ʃ))
+(t! def-seq ~sh           (S-` s h                     spc) (macro 🔣ʃ))
+(t! def-seq ~T            (S-` t                       spc) (macro 🔣θ))
+(t! def-seq ~th           (S-` t h                     spc) (macro 🔣θ))
+(t! def-seq ~ts           (S-` t s                     spc) (macro 🔣ʦ))
+(t! def-seq ~ch           (S-` c h                     spc) (macro 🔣ʧ))
+(t! def-seq ~tsh          (S-` t s h                   spc) (macro 🔣ʧ))
+(t! def-seq ~u            (S-` u                       spc) (macro 🔣ʊ))
+(t! def-seq ~V            (S-` v                       spc) (macro 🔣ʋ))
+(t! def-seq ~W            (S-` w                       spc) (macro 🔣ʷ))
+(t! def-seq ~X            (S-` x                       spc) (macro 🔣χ))
+(t! def-seq ~xh           (S-` x h                     spc) (macro 🔣ɕ))
+(t! def-seq ~y            (S-` y                       spc) (macro 🔣ʏ))
+(t! def-seq ~Z            (S-` z                       spc) (macro 🔣ʒ))
+(t! def-seq ~zh           (S-` z h                     spc) (macro 🔣ʒ))
+

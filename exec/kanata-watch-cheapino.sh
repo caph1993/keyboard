@@ -7,7 +7,7 @@ SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 
 cd "$SCRIPT_DIR"
 COMMAND=""$SCRIPT_DIR/kanata_linux_x64" $@"
-CONFIG_FILE="$SCRIPT_DIR/../configs/cheapino.kbd"
+CONFIG_FILE="$SCRIPT_DIR/../cheapino.kbd"
 BACKUP_FILE="$SCRIPT_DIR/../.kanata-watch/cheapino-backup.kbd"
 LOG_FILE="$SCRIPT_DIR/../.kanata-watch/cheapino-log.log"
 
