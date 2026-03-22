@@ -22,58 +22,6 @@
 )
 
 
-(defvar
-  ;; timings in ms using ZMK-like names
-  tapping-term 250   ;; A higher number allows for one handed modded keys reducing the chance of false-positives when typing fast
-  quick-tap-ms 200                       ;; same as ZMK ($tap-repress-timeout in Kanata docs)
-  require-prior-idle 55                 ;; same as ZMK (not used in vanilla kanata, but used as a workaround in this confit)  
-  
-  ;; keys for tap-hold-release-tap-keys-release templates
-  left-side-keys   (r t s d g z x c v b) ;; these keys will always make the precedent same hand tap-hold-release-tap-keys-release output tap. B is missing because I, sometimes, alt finger it
-  right-side-keys  (y u k l ; m n , .) ;; these keys will always make the precedent same hand tap-hold-release-tap-keys-release output tap
-  home-row-left-keys  (q w e a f)      ;; home row mods - these will output a tap if they're released after the first key
-  home-row-right-keys (j i o p ')        ;; home row mods - these will output a tap if they're released after the first key
-)
-(defvirtualkeys fast_typing_state XX)
-(deftemplate nomod (tap) (multi
-  $tap (fork (hold-for-duration $require-prior-idle fast_typing_state) XX (lctl rctl lalt ralt lmet rmet))
-))
-
-(deftemplate hrm* (tappingterm tap-key hold-key)
-  (switch
-    ((input virtual fast_typing_state)) (t! nomod $tap-key) break
-    () (tap-hold $quick-tap-ms $tappingterm
-         (t! nomod $tap-key)
-         $hold-key
-       ) break
-  )
-)
-(deftemplate hrm*-sided (tappingterm tap-key hold-key same-side-keys home-row-keys)
-  (switch
-    ((input virtual fast_typing_state)) (t! nomod $tap-key) break
-    () (tap-hold-release-tap-keys-release $quick-tap-ms $tappingterm
-        (t! nomod $tap-key)
-        $hold-key
-        $same-side-keys $home-row-keys
-       ) break
-  )
-)
-(deftemplate rhrm* (tappingterm tap-key hold-key)  ;; right hand mods
-  (t! hrm*-sided $tappingterm $tap-key $hold-key $right-side-keys $home-row-right-keys)
-)
-(deftemplate lhrm* (tappingterm tap-key hold-key)  ;; left hand mods
-  (t! hrm*-sided $tappingterm $tap-key $hold-key $left-side-keys $home-row-left-keys)
-)
-(deftemplate lhrm (tap-key hold-key)  ;; left hand mods
-  (t! hrm*-sided $tapping-term $tap-key $hold-key $left-side-keys $home-row-left-keys)
-)
-(deftemplate rhrm (tap-key hold-key)  ;; right hand mods
-  (t! hrm*-sided $tapping-term $tap-key $hold-key $right-side-keys $home-row-right-keys)
-)
-(deftemplate hrm (tap-key hold-key)  ;; mods on both hands
-  (t! hrm* $tapping-term $tap-key $hold-key)
-)
-
 ;; https://github.com/jtroo/kanata/discussions/1656#discussioncomment-14382030
 
 (defsrc
@@ -90,115 +38,57 @@
 )
 
 (defchordsv2
-  (m l  ) ret     $chord-timeout all-released (symbols-right)
-  (m k  ) @bspc   $chord-timeout all-released (symbols-right)
-  (i j o) lrld    $chord-timeout all-released (symbols-right)
+  (i j o) lrld    $chord-timeout all-released (num-layer)
 
-  ([ m   ) @mouse                   $chord-timeout all-released ()
-  (tab m ) @mouse                   $chord-timeout all-released ()
   ([ ralt) @ralt-cycler             $chord-timeout all-released ()
+  ([ rctl) @rctl-cycler             $chord-timeout all-released ()
+  (] rctl) @rctl-cycler             $chord-timeout all-released ()
   ([ p   ) @*TeX                    $chord-timeout all-released ()
-  ([ n   ) @num-lock                $chord-timeout all-released ()
 )
 
 (deflayermap (base)
   ;; Middle
-  tab  (t! hrm   tab @arrows-mouse)
-  q    (t! lhrm   q    lsft) ;; only when working on bed
-  w    (t! lhrm   w    lalt)
-  e    (t! lhrm   e    lctl)
-  f    (t! lhrm   f    lsft)
-  g    (t! lhrm   g    @symbols-right)
-  h    (t! nomod h)
-  j    (t! rhrm   j    rsft)
-  i    (t! rhrm   i    rctl)
-  o    (t! rhrm   o    lalt)
-  p    (t! nomod  p)
-  [    (t! hrm   [   @arrows-mouse)
-  ]    (t! nomod ])
-  \    (tap-hold 200 200 (t! nomod \) @*TeX)
+  tab     (tap-hold-press 200 200 tab (multi @arrows (layer-while-held mods-left)))
+  [       (tap-hold-press 200 200 [   (multi (layer-while-held mods-left) @arrows))
+  4       (tap-hold-press 200 200 4   (multi (layer-while-held mods-left) @arrows))
+  ,       (tap-hold-press 200 200 ,   lctl)
+  .       (tap-hold-press 200 200 .   lalt)
+  
+  caps    (tap-hold 100 100 caps @mouse)
+  \       (tap-hold 200 200 \ @*TeX)
+  ;;    Bottom
 
-  ;; Bottom
-  caps (tap-hold 100 100 caps @symbols-right)
-  a    (t! nomod a)
-  s    (t! lhrm s @symbols-right)
-  d    (t! lhrm d @arrows-mouse)
-  k    (t! nomod k)
-  l    (t! nomod l)
-  ;    (t! nomod ;)
-  ;; '    (t! rhrm   '    @num-FKeys)
+  ;;    Far top
+  F1      (tap-hold 200 600 F1  (layer-switch base))
+  F2      (tap-hold 200 600 F2  (layer-switch layout-IPA))
+  F12     (tap-hold 200 600 F12 lrld)
 
-  ;; Top
-  r    (t! nomod r)
-  t    (t! nomod t)
-  y    (t! nomod y)
-  u    (t! nomod u)
-  -    (t! rhrm   -    rsft)
-  `    (t! hrm    `    (multi @symbols-right))
-  1    (t! hrm    1    (multi lsft @symbols-right))
-  2    (t! hrm    2    (multi nop1 @symbols-right))
-  3    (t! hrm    3    (multi lsft nop1 @symbols-right))
-
-  ;; Far bottom
-  z    (t! nomod z)
-  x    (t! nomod x) 
-  c    (t! nomod c)
-  v    (t! nomod v)
-  b    (t! nomod b)
-  n    (t! nomod n)
-  m    (t! nomod m)
-  ,    (t! nomod ,)
-  .    (t! nomod .)
-  /    (t! nomod /)
-
-  ;; Far top
-  esc @esc
-  F1   (tap-hold 200 600 F1  @L1)
-  F2   (tap-hold 200 600 F2  @L2)
-  F12  (tap-hold 200 600 F12 lrld)
-  spc  (t! hrm   spc @arrows-mouse)
-
+  ;; No thumbs. It's uncomfortable for me.
   left @← up @↑ down @↓ right @→
 )
 
-(defalias ralt-cycler (multi (release-key ralt) lalt (macro tab) (layer-while-held ralt-cycler)))
-(deflayermap ralt-cycler [ tab ' S-tab 0 esc - esc = esc ] esc  j @← i @↑ k @↓ o @→)
+(deflayermap (mods-left)
+  tab lctl
+  q   lsft ;; only when working on bed
+  w   lalt
+  e   lctl
+  f   lsft
+  g   lmet
+  d   (multi (layer-while-held mods-left)  (layer-while-held num-layer))
+  t   (multi (layer-while-held mods-left)  (layer-while-held FKeys-layer))
+  r   (multi (layer-while-held mods-left)  (layer-while-held media-layer))
+  a XX s C-s
+  z   C-z  x C-x  c C-c  v C-v  b XX
+)
+
+(defalias ralt-cycler (multi (release-key ralt) lalt (macro tab) (layer-while-held tab-cycler)))
+(defalias rctl-cycler (multi lctl (macro tab) (layer-while-held tab-cycler)))
+(deflayermap tab-cycler [ tab ' S-tab 0 esc - esc = esc ] tab ret S-tab j @← i @↑ k @↓ o @→)
 
 (defalias
-  L1 (on-press press-vkey L1)
-  L2 (on-press press-vkey L2)
-  ;; unlock      (on-press press-vkey unlock)
-  ;; lock-arrows (on-press press-vkey lock-arrows)
-  ;; lock-mouse  (on-press press-vkey lock-mouse)
-  ;; num-lock    (on-press press-vkey num-lock)
-)
-(defalias esc  (multi esc @L1)) ;; tap esc to exit custom layouts
-
-(defvirtualkeys
-  L2          (layer-while-held layout-IPA)
-  L3          (layer-while-held layout-cyrillic)
-  ;; lock-arrows (layer-while-held arrows-right)
-  ;; lock-mouse  (layer-while-held mouse)
-  num-lock    (layer-while-held symbols-right)
-)
-(defvirtualkeys
-  L1 (multi
-    (on-press release-vkey L2)
-    (on-press release-vkey L3)
-  )
-  ;; unlock (multi
-  ;;   (on-press release-vkey lock-arrows)
-  ;;   (on-press release-vkey lock-mouse)
-  ;;   (on-press release-vkey num-lock)
-  ;; )
-)
-
-(defalias
-  arrows (multi (layer-while-held arrows-right) (layer-while-held ctl-left) )
+  arrows (layer-while-held arrows-right)
   mouse  (layer-while-held mouse)
-  symbols-right (layer-while-held symbols-right)
-  arrows-mouse (multi @arrows (fork XX @mouse (ralt)))
-) 
+)
 
 (include "configs/mouse.kbd")
 (defchords chord-arrows $chord-timeout
@@ -227,12 +117,12 @@
   ralt nop1
   lalt nop1
   
+  tab lctl
+  [   lctl
+  '   ret
   p XX
-  [    lctl
-  tab  lctl
   n    (fork ret   🖰1 (nop1))
   m    XX
-  spc  (tap-hold 200 200 spc sft)
 )
 
 (deflayermap mouse
@@ -253,8 +143,8 @@
 ;; Repeated arrow means ctrl+arrow (word jump). Only defined for left and right.
 (defalias ↑    (fork up   @☸↑ (nop1)))
 (defalias ↓    (fork down @☸↓ (nop1)))
-(defalias ←    (fork left    (tap-hold 200 500 C-left  (macro (unmod home))) (lctl rctl)))
-(defalias →    (fork right   (tap-hold 200 500 C-right (macro (unmod end ))) (lctl rctl)))
+(defalias ←    (fork left    (tap-hold 200 500 C-left  (macro (unmod (lctl rctl) home))) (lctl rctl)))
+(defalias →    (fork right   (tap-hold 200 500 C-right (macro (unmod (lctl rctl) end))) (lctl rctl)))
 
 (defalias Xbspc (macro (unmod lsft home) (unmod bspc)))
 (defalias Xdel  (macro (unmod lsft end) (unmod del)))
@@ -264,65 +154,23 @@
 (defalias bspc  (fork bspc   @Cbspc (lctl rctl)))
 
 
-(deflayermap ctl-left
-  z C-z x C-x c C-c v C-v b C-b
-  a C-a s C-s d C-d g C-g
-  q C-q  r C-r t C-t
-  f (t! lhrm C-f lsft)
-  w (t! lhrm C-w lalt)
-  e (t! lhrm C-e lctl)
+(deflayermap num-layer
+  u 7   8 8   9 9   0 0   - -
+  j 4   i 5   o 6   [ [   ] ]
+  m 1   k 2   l 3   ; ;
 )
 
-(defalias
-  ,; (fork ,   (unmod ;) (sft rsft))
-  .: (fork .   S-;       (sft rsft))
-  << (fork S-9 S-,       (sft rsft))
-  >> (fork S-0 S-.       (sft rsft))
+(deflayermap FKeys-layer
+  y PrintScreen
+  u F7   8 F8   9 F9   0 F10   - F11   = F12
+  j F4   i F5   o F6
+  m F1   k F2   l F3
 )
-(defalias
-  num-lock (switch
-    ((input virtual num-lock)) (on-press release-vkey num-lock) break
-    () (on-press press-vkey num-lock) break
-))
-(deflayermap symbols-right
-  m     (fork  1   @,; (nop1))
-  k     (fork  2   @.: (nop1))
-  l     (fork  3   /   (nop1))
-  j     (fork  4   @<< (nop1))
-  i     (fork  5   @>> (nop1))
-  o     (fork  6   -   (nop1))
-  u     (fork  7   [   (nop1))
-  9     (fork  8   ]   (nop1))
-  0     (fork  9   '   (nop1))
-  =     (fork  0   =   (nop1))
-  ,     (fork  0   =   (nop1))
-  h     (fork  `   \   (nop1))
-  ; XX
-  8 XX
-
-  w      nop1
-  lalt   nop1
-  ralt   nop1
-  n      ret
-
-  [     (multi @num-lock @arrows-mouse)
-)
-
-
-(defalias
+(deflayermap media-layer
   ;; names: https://github.com/jtroo/kanata/blob/main/parser/src/keys/mod.rs
-  fn-F1 mute
-  fn-F2 VolumeDown
-  fn-F3 VolumeUp
-  fn-F4 blup
-  fn-F5 bldn
-  fn-F6 brup
-  fn-F7 brdown
-  fn-F8 XX
-  fn-F9 XX
-  fn-F10 PrintScreen
-  fn-F11 home
-  fn-F12 end
+  u brdown     8 brup   9 bldn   0 blup
+  j VolumeDown   i mute   o VolumeUp
+  m prev         k pp     l next
 )
 
 (include "configs/sldr-base.kbd")
