@@ -18,9 +18,8 @@
   sequence-timeout 8000 ;; 8 seconds maximum between key presses in sldr sequence
   log-layer-changes no        ;; no logging
   concurrent-tap-hold yes
-  process-unmapped-keys no
+  process-unmapped-keys yes
 )
-
 
 ;; https://github.com/jtroo/kanata/discussions/1656#discussioncomment-14382030
 
@@ -44,6 +43,7 @@
   ([ rctl) @rctl-cycler             $chord-timeout all-released ()
   (] rctl) @rctl-cycler             $chord-timeout all-released ()
   ([ p   ) @*TeX                    $chord-timeout all-released ()
+  (esc F1) (layer-switch base)      $chord-timeout all-released ()
 )
 
 (deflayermap (base)
@@ -61,6 +61,9 @@
   ;;    Far top
   F1      (tap-hold 200 600 F1  (layer-switch base))
   F2      (tap-hold 200 600 F2  (layer-switch layout-IPA))
+  F3      (tap-hold 200 600 F3  (layer-switch layout-cyrillic))
+  F4      (tap-hold 200 600 F4  (layer-switch layout-my-colemak))
+
   F12     (tap-hold 200 600 F12 lrld)
 
   ;; No thumbs. It's uncomfortable for me.
@@ -168,7 +171,7 @@
 )
 (deflayermap media-layer
   ;; names: https://github.com/jtroo/kanata/blob/main/parser/src/keys/mod.rs
-  u brdown     8 brup   9 bldn   0 blup
+  u brdown     8 brup   9 C-S-F6   0 C-S-F7
   j VolumeDown   i mute   o VolumeUp
   m prev         k pp     l next
 )
@@ -181,6 +184,7 @@
 (defalias *IPA (multi @*sldr (macro (unicode *) 150 bspc sldr 5 S-`)))
 
 (include "configs/international-layouts.kbd")
+(include "configs/colemak.kbd")
 
 ;; ----------------------------------------------------------
 ;; Tab and arrows layer

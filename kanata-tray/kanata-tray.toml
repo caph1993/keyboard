@@ -11,11 +11,12 @@ defaults.tcp_port = 5829
 
 [defaults.layer_icons]
 mouse = 'kanata-icon-blue.png'
-arrows = 'kanata-icon-cyan.png'
-num = 'kanata-icon-orange.png'
-FKeys = 'kanata-icon-purple.png'
+arrows-right = 'kanata-icon-cyan.png'
+num-layer = 'kanata-icon-orange.png'
+FKeys-layer = 'kanata-icon-purple.png'
 sldr-on = 'kanata-icon-red.png'
 layout-IPA = 'kanata-icon-green.png'
+layout-my-colemak = 'kanata-icon-purple.png'
 
 [presets.'Default Preset']
 kanata_executable = '/home/carlos/keyboard/exec/kanata_linux_x64'

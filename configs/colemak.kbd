@@ -1,0 +1,38 @@
+
+(deflayermap layout-colemak-dh
+  q q  w w  e f  r p  t b  y y  u l  i u  o y  p ;
+  a a  s r  d s  f t  g g  h h  j n  k e  l i  ; o
+  z z  x x  c d  v v  b m  n n  m m  , ,  . .  / /
+)
+(deflayermap layout-colemak-dh-shifted
+  q q     w w  e f  r p  t b          y y  u l  i u  o y  p ;
+  a a     s r  d s  f t  g g          h h  j n  k e  l i  ; o
+  lsft z  z x  x c  c d  v v  b lsft  n n  m m  , ,  . .  / / 
+)
+
+(defchords chords-my-colemak $chord-timeout
+  
+  (q) q     (w) w  (e) f  (r) p  (t) b           (y) y  (u) l  (i) u  (o) y  (p) bspc
+  (a) a     (s) r  (d) s  (f) t  (g) g           (h) m  (j) n  (k) e  (l) i  (;) o
+  (z) x  (x) c  (c) d  (v) v  (b) lsft (n) k  (m) h  (,) ,  (.) .
+  
+  (lsft) (tap-hold 200 200 z    lsft)
+  (/)    (tap-hold 200 200 ret  lsft)
+  
+  (q w) esc
+  (a s) tab
+  (z x) S-tab
+  (o p) '
+  (. /) /
+)
+(deftemplate ck-dh (key) (chord chords-my-colemak $key))
+(deflayermap layout-my-colemak
+  lsft (t! ck-dh lsft)
+  q (t! ck-dh q)     w (t! ck-dh w)  e (t! ck-dh e)  r (t! ck-dh r)  t (t! ck-dh t)
+  a (t! ck-dh a)     s (t! ck-dh s)  d (t! ck-dh d)  f (t! ck-dh f)  g (t! ck-dh g)
+  z (t! ck-dh z)     x (t! ck-dh x)  c (t! ck-dh c)  v (t! ck-dh v)  b (t! ck-dh b)
+  
+  y (t! ck-dh y)  u (t! ck-dh u)  i (t! ck-dh i)  o (t! ck-dh o)  p (t! ck-dh p)
+  h (t! ck-dh h)  j (t! ck-dh j)  k (t! ck-dh k)  l (t! ck-dh l)  ; (t! ck-dh ;)
+  n (t! ck-dh n)  m (t! ck-dh m)  , (t! ck-dh ,)  . (t! ck-dh .)  / (t! ck-dh /)  
+)
