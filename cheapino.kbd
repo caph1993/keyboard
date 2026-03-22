@@ -349,7 +349,7 @@
 )
 
 
-(include "mouse.kbd")
+(include "configs/mouse.kbd")
 (defalias ↑    (fork up   @☸↑ (nop1)))
 (defalias ↓    (fork down @☸↓ (nop1)))
 (defalias ←    (fork left home (nop1)))

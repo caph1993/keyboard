@@ -108,7 +108,7 @@
   w    (t! lhrm   w    lalt)
   e    (t! lhrm   e    lctl)
   f    (t! lhrm   f    lsft)
-  g    (t! lhrm   g    lmet)
+  g    (t! lhrm   g    @symbols-right)
   h    (t! nomod h)
   j    (t! rhrm   j    rsft)
   i    (t! rhrm   i    rctl)
@@ -154,6 +154,7 @@
   ;; Far top
   esc @esc
   F1   (tap-hold 200 600 F1  @L1)
+  F2   (tap-hold 200 600 F2  @L2)
   F12  (tap-hold 200 600 F12 lrld)
   spc  (t! hrm   spc @arrows-mouse)
 
@@ -164,26 +165,26 @@
 (deflayermap ralt-cycler [ tab ' S-tab 0 esc - esc = esc ] esc  j @← i @↑ k @↓ o @→)
 
 (defalias
-  L0 (on-press press-vkey L0)
   L1 (on-press press-vkey L1)
+  L2 (on-press press-vkey L2)
   ;; unlock      (on-press press-vkey unlock)
   ;; lock-arrows (on-press press-vkey lock-arrows)
   ;; lock-mouse  (on-press press-vkey lock-mouse)
   ;; num-lock    (on-press press-vkey num-lock)
 )
-(defalias esc  (multi esc @L0)) ;; tap esc to exit custom layouts
+(defalias esc  (multi esc @L1)) ;; tap esc to exit custom layouts
 
 (defvirtualkeys
-  L1          (layer-while-held layout-IPA)
-  L2          (layer-while-held layout-cyrillic)
+  L2          (layer-while-held layout-IPA)
+  L3          (layer-while-held layout-cyrillic)
   ;; lock-arrows (layer-while-held arrows-right)
   ;; lock-mouse  (layer-while-held mouse)
   num-lock    (layer-while-held symbols-right)
 )
 (defvirtualkeys
-  L0 (multi
-    (on-press release-vkey L1)
+  L1 (multi
     (on-press release-vkey L2)
+    (on-press release-vkey L3)
   )
   ;; unlock (multi
   ;;   (on-press release-vkey lock-arrows)
@@ -193,30 +194,31 @@
 )
 
 (defalias
-  arrows (layer-while-held arrows-right)
+  arrows (multi (layer-while-held arrows-right) (layer-while-held ctl-left) )
   mouse  (layer-while-held mouse)
   symbols-right (layer-while-held symbols-right)
   arrows-mouse (multi @arrows (fork XX @mouse (ralt)))
-)
+) 
 
 (include "configs/mouse.kbd")
 (defchords chord-arrows $chord-timeout
-  (lctl) lctl
   (j) @←
   (i) @↑
-  (k) @↓
   (o) @→
-  (u) @bspc
-  (l) @del
+  (k) @↓
+  (i j) home
+  (i o) end
+  (k j) pgup
+  (k o) pgdn
 )
 (deflayermap arrows-right
   y C-y
-  u (chord chord-arrows u)
+  u @bspc
   i (chord chord-arrows i)
   o (chord chord-arrows o)
   j (chord chord-arrows j)
+  l @del
   k (chord chord-arrows k)
-  l (chord chord-arrows l)
 
   8 (fork C-z S-8 (sft))
   9 (fork C-c S-9 (sft))
@@ -226,8 +228,8 @@
   lalt nop1
   
   p XX
-  lctl (chord chord-arrows lctl)
-  tab  (chord chord-arrows lctl)
+  [    lctl
+  tab  lctl
   n    (fork ret   🖰1 (nop1))
   m    XX
   spc  (tap-hold 200 200 spc sft)
@@ -262,6 +264,14 @@
 (defalias bspc  (fork bspc   @Cbspc (lctl rctl)))
 
 
+(deflayermap ctl-left
+  z C-z x C-x c C-c v C-v b C-b
+  a C-a s C-s d C-d g C-g
+  q C-q  r C-r t C-t
+  f (t! lhrm C-f lsft)
+  w (t! lhrm C-w lalt)
+  e (t! lhrm C-e lctl)
+)
 
 (defalias
   ,; (fork ,   (unmod ;) (sft rsft))
