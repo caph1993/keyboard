@@ -10,29 +10,119 @@
   lsft z  z x  x c  c d  v v  b lsft  n n  m m  , ,  . .  / / 
 )
 
-(defchords chords-my-colemak $chord-timeout
-  
-  (q) q     (w) w  (e) f  (r) p  (t) b           (y) y  (u) l  (i) u  (o) y  (p) bspc
-  (a) a     (s) r  (d) s  (f) t  (g) g           (h) m  (j) n  (k) e  (l) i  (;) o
-  (z) x  (x) c  (c) d  (v) v  (b) lsft (n) k  (m) h  (,) ,  (.) .
-  
-  (lsft) (tap-hold 200 200 z    lsft)
-  (/)    (tap-hold 200 200 ret  lsft)
+
+(defalias
+  cpz (tap-hold 200 200 z    lsft)
+  cpR (tap-hold 200 200 ret  rsft)
+)
+
+(defchords chords-cp-1 $chord-timeout
+  (q) q    (w) w   (f) f   (p) p   (b) b
+  (a) a    (r) r   (s) s   (t) t   (g) g
+  (z) @cpz (x) x   (c) c   (d) d   (v) v
+
+  (j) j   (l) l   (u) u   (y) y   (bspc) bspc
+  (m) m   (n) n   (e) e   (i) i   (o)    o
+  (k) k   (h) h   (,) ,   (.) .   (ret)  @cpR
   
   (q w) esc
-  (a s) tab
-  (z x) S-tab
-  (o p) '
-  (. /) /
+  (a r) tab
+  (y bspc) '
+  (. ret) /
+  (z x) C-x
+  (x c) C-c
+  (c v) C-v
+  (z c) C-z
+  (x v) C-y
 )
-(deftemplate ck-dh (key) (chord chords-my-colemak $key))
+(deftemplate cp1 (key) (chord chords-cp-1 $key))
+(deftemplate cp2 (key) (chord chords-cp-2 $key))
+(deftemplate cp3 (key) (chord chords-cp-3 $key))
+(deftemplate cp4 (key) (chord chords-cp-4 $key))
+(deftemplate cp5 (key) (chord chords-cp-5 $key))
+(deftemplate cp6 (key) (chord chords-cp-6 $key))
+
 (deflayermap layout-my-colemak
-  lsft (t! ck-dh lsft)
-  q (t! ck-dh q)     w (t! ck-dh w)  e (t! ck-dh e)  r (t! ck-dh r)  t (t! ck-dh t)
-  a (t! ck-dh a)     s (t! ck-dh s)  d (t! ck-dh d)  f (t! ck-dh f)  g (t! ck-dh g)
-  z (t! ck-dh z)     x (t! ck-dh x)  c (t! ck-dh c)  v (t! ck-dh v)  b (t! ck-dh b)
+
+  1 XX  2 XX  5 XX  6 XX  q XX  d XX  b XX  z XX  x XX
+  7 XX  0 XX  = XX  ; XX  , XX  . XX  / XX  p XX  ] XX  \ XX
+
+  `    (t! cp1 q)  3 (t! cp1 w)  4 (t! cp1 f) r (t! cp1 p)  t (t! cp1 b)
+  tab  (t! cp1 a)  w (t! cp1 r)  e (t! cp1 s) f (t! cp1 t)  g (t! cp1 g) 
+  caps (t! cp1 z)  a (t! cp1 x)  s (t! cp1 c) c (t! cp1 d)  v (t! cp1 v)
   
-  y (t! ck-dh y)  u (t! ck-dh u)  i (t! ck-dh i)  o (t! ck-dh o)  p (t! ck-dh p)
-  h (t! ck-dh h)  j (t! ck-dh j)  k (t! ck-dh k)  l (t! ck-dh l)  ; (t! ck-dh ;)
-  n (t! ck-dh n)  m (t! ck-dh m)  , (t! ck-dh ,)  . (t! ck-dh .)  / (t! ck-dh /)  
+  y    (t! cp1 j)  u (t! cp1 l)  8 (t! cp1 u)  9 (t! cp1 y)  - (t! cp1 bspc)
+  h    (t! cp1 m)  j (t! cp1 n)  i (t! cp1 e)  o (t! cp1 i)  [ (t! cp1 o)
+  n    (t! cp1 k)  m (t! cp1 h)  k (t! cp1 ,)  l (t! cp1 .)  ' (t! cp1 ret)
+  lalt @cpNav
+  spc  (tap-hold 200 200 spc @cpNav)
+)
+(defalias
+  cpNav (multi (layer-while-held cp-mods-left) (layer-while-held cp-arrows))
+  cpNum (multi (layer-while-held cp-mods-left) (layer-while-held cp-num-layer))
+  cpFKs (multi (layer-while-held cp-mods-left) (layer-while-held cp-FKeys-layer))
+  cpMed (multi (layer-while-held cp-mods-left) (layer-while-held cp-media-layer))
+)
+
+
+(defchords chords-cp-4 $chord-timeout
+  (q) XX    (w) @cpFKs  (f) @cpMed  (p) XX    (b) esc
+  (a) lctl  (r) lalt    (s) lctl    (t) lsft  (g) tab
+  (z) XX    (x) @cpNum  (c) XX      (d) d     (v) S-tab
+)
+(deflayermap cp-mods-left
+  `    (t! cp4 q)  3 (t! cp4 w)  4 (t! cp4 f) r (t! cp4 p)  t (t! cp4 b)
+  tab  (t! cp4 a)  w (t! cp4 r)  e (t! cp4 s) f (t! cp4 t)  g (t! cp4 g) 
+  caps (t! cp4 z)  a (t! cp4 x)  s (t! cp4 c) c (t! cp4 d)  v (t! cp4 v)
+)
+
+(defchords chords-cp-2 $chord-timeout
+  (j) XX  (l) XX   (u) XX  (y) XX  (bspc) bspc
+  (m) XX  (n) @←   (e) @↑  (i) @→  (o)    lctl
+  (k) XX  (h) bspc (,) @↓  (.) del (ret)  ret
+
+  (e n) home
+  (e i) end
+  (, n) pgup
+  (, i) pgdn
+)
+(deflayermap cp-arrows
+  y    (t! cp2 j)  u (t! cp2 l)  8 (t! cp2 u)  9 (t! cp2 y)  - (t! cp2 bspc)
+  h    (t! cp2 m)  j (t! cp2 n)  i (t! cp2 e)  o (t! cp2 i)  [ (t! cp2 o)
+  n    (t! cp2 k)  m (t! cp2 h)  k (t! cp2 ,)  l (t! cp2 .)  ' (t! cp2 ret)
+)
+
+(defchords chords-cp-3 $chord-timeout
+  (j) ;  (l) 7  (u) 8  (y) 9   (bspc) 0
+  (m) [  (n) 4  (e) 5  (i) 6   (o)    -
+  (k) `  (h) 1  (,) 2  (.) 3   (ret)  =
+  (m n) ]
+  (k m) \
+)
+(deflayermap cp-num-layer
+  y    (t! cp3 j)  u (t! cp3 l)  8 (t! cp3 u)  9 (t! cp3 y)  - (t! cp3 bspc)
+  h    (t! cp3 m)  j (t! cp3 n)  i (t! cp3 e)  o (t! cp3 i)  [ (t! cp3 o)
+  n    (t! cp3 k)  m (t! cp3 h)  k (t! cp3 ,)  l (t! cp3 .)  ' (t! cp3 ret)
+)
+
+(defchords chords-cp-5 $chord-timeout
+  (j) PrintScreen  (l) F7  (u) F8  (y) F9   (bspc) F10
+  (m) caps         (n) F4  (e) F5  (i) F6   (o)    F11
+  (k) Insert       (h) F1  (,) F2  (.) F3   (ret)  F12
+)
+(deflayermap cp-FKeys-layer
+  y    (t! cp5 j)  u (t! cp5 l)  8 (t! cp5 u)  9 (t! cp5 y)  - (t! cp5 bspc)
+  h    (t! cp5 m)  j (t! cp5 n)  i (t! cp5 e)  o (t! cp5 i)  [ (t! cp5 o)
+  n    (t! cp5 k)  m (t! cp5 h)  k (t! cp5 ,)  l (t! cp5 .)  ' (t! cp5 ret)
+)
+
+(defchords chords-cp-6 $chord-timeout
+  (j) XX  (l) brdn        (u) brup  (y) C-S-F6     (bspc) C-S-F7
+  (m) XX  (n) VolumeDown  (e) mute  (i) VolumeUp   (o)    XX
+  (k) XX  (h) prev        (,) F2    (.) next       (ret)  XX
+)
+(deflayermap cp-media-layer
+  y    (t! cp6 j)  u (t! cp6 l)  8 (t! cp6 u)  9 (t! cp6 y)  - (t! cp6 bspc)
+  h    (t! cp6 m)  j (t! cp6 n)  i (t! cp6 e)  o (t! cp6 i)  [ (t! cp6 o)
+  n    (t! cp6 k)  m (t! cp6 h)  k (t! cp6 ,)  l (t! cp6 .)  ' (t! cp6 ret)
 )

@@ -44,6 +44,12 @@
   (] rctl) @rctl-cycler             $chord-timeout all-released ()
   ([ p   ) @*TeX                    $chord-timeout all-released ()
   (esc F1) (layer-switch base)      $chord-timeout all-released ()
+
+  (z x) C-x  $chord-timeout all-released (layout-my-colemak)
+  (x c) C-c  $chord-timeout all-released (layout-my-colemak)
+  (c v) C-v  $chord-timeout all-released (layout-my-colemak)
+  (z c) C-z  $chord-timeout all-released (layout-my-colemak)
+  (x v) C-y  $chord-timeout all-released (layout-my-colemak)
 )
 
 (deflayermap (base)
@@ -77,11 +83,12 @@
   e   lctl
   f   lsft
   g   lmet
-  d   (multi (layer-while-held mods-left)  (layer-while-held num-layer))
-  t   (multi (layer-while-held mods-left)  (layer-while-held FKeys-layer))
+  ;; num and Fkeys on ring finger to enable ctl sft modifiers on those layers
+  a   (multi (layer-while-held mods-left)  (layer-while-held num-layer))
+  2   (multi (layer-while-held mods-left)  (layer-while-held FKeys-layer))
   r   (multi (layer-while-held mods-left)  (layer-while-held media-layer))
-  a XX s C-s
-  z   C-z  x C-x  c C-c  v C-v  b XX
+  d C-d  s C-s  t C-t
+  z C-z  x C-x  c C-c  v C-v  b XX
 )
 
 (defalias ralt-cycler (multi (release-key ralt) lalt (macro tab) (layer-while-held tab-cycler)))
