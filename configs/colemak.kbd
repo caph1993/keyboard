@@ -66,9 +66,9 @@
 
 
 (defchords chords-cp-4 $chord-timeout
-  (q) XX    (w) @cpFKs  (f) @cpMed  (p) XX    (b) esc
-  (a) lctl  (r) lalt    (s) lctl    (t) lsft  (g) tab
-  (z) XX    (x) @cpNum  (c) XX      (d) d     (v) S-tab
+  (q) esc   (w) @cpFKs  (f) @cpMed  (p) S-tab (b) XX
+  (a) lctl  (r) lalt    (s) lctl    (t) lsft  (g) XX
+  (z) XX    (x) @cpNum  (c) lmet    (d) tab   (v) XX
 )
 (deflayermap cp-mods-left
   `    (t! cp4 q)  3 (t! cp4 w)  4 (t! cp4 f) r (t! cp4 p)  t (t! cp4 b)

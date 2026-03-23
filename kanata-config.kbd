@@ -54,11 +54,15 @@
 
 (deflayermap (base)
   ;; Middle
-  tab     (tap-hold-press 200 200 tab (multi @arrows (layer-while-held mods-left)))
-  [       (tap-hold-press 200 200 [   (multi (layer-while-held mods-left) @arrows))
-  4       (tap-hold-press 200 200 4   (multi (layer-while-held mods-left) @arrows))
-  ,       (tap-hold-press 200 200 ,   lctl)
-  .       (tap-hold-press 200 200 .   lalt)
+  tab     (tap-hold-press 200 200 tab @nav)
+  [       (tap-hold-press 200 200 [   @nav)
+  spc     (tap-hold 200 200 spc @nav)
+  3       (tap-hold-press 200 200 3   lalt)
+  4       (tap-hold-press 200 200 4   lctl)
+  8       (tap-hold-press 200 200 8   lctl)
+  ,       (tap-hold-release-keys 200 200 ,   lctl (spc))
+  .       (tap-hold-release-keys 200 200 .   lalt (spc))
+  /       (tap-hold-release-keys 200 200 /   lsft (spc))
   
   caps    (tap-hold 100 100 caps @mouse)
   \       (tap-hold 200 200 \ @*TeX)
@@ -77,18 +81,23 @@
 )
 
 (deflayermap (mods-left)
-  tab lctl
-  q   lsft ;; only when working on bed
-  w   lalt
-  e   lctl
-  f   lsft
-  g   lmet
+  tab (multi @mod lctl)     
+  q   (multi @mod lsft)      ;; only when working on bed
+  w   (multi @mod lalt)     
+  e   (multi @mod lctl)     
+  f   (multi @mod lsft)     
+  `   (multi @mod esc )    
+  r   (multi @mod tab )    
+  c   (multi @mod S-tab)
   ;; num and Fkeys on ring finger to enable ctl sft modifiers on those layers
-  a   (multi (layer-while-held mods-left)  (layer-while-held num-layer))
-  2   (multi (layer-while-held mods-left)  (layer-while-held FKeys-layer))
-  r   (multi (layer-while-held mods-left)  (layer-while-held media-layer))
-  d C-d  s C-s  t C-t
-  z C-z  x C-x  c C-c  v C-v  b XX
+  a   @num
+  2   @fks
+  3   @med
+  d   XX
+  s   (multi @mod lmet)
+  z   XX
+  x   XX
+  v   XX
 )
 
 (defalias ralt-cycler (multi (release-key ralt) lalt (macro tab) (layer-while-held tab-cycler)))
@@ -96,22 +105,24 @@
 (deflayermap tab-cycler [ tab ' S-tab 0 esc - esc = esc ] tab ret S-tab j @← i @↑ k @↓ o @→)
 
 (defalias
-  arrows (layer-while-held arrows-right)
-  mouse  (layer-while-held mouse)
+  mod (layer-while-held mods-left)
+  nav (multi @mod (layer-while-held arrows))
+  num (multi @mod (layer-while-held num-layer))
+  fks (multi @mod (layer-while-held FKeys-layer))
+  med (multi @mod (layer-while-held media-layer))
+  mouse (multi @mod (layer-while-held arrows) (layer-while-held mouse))
 )
 
 (include "configs/mouse.kbd")
 (defchords chord-arrows $chord-timeout
-  (j) @←
-  (i) @↑
-  (o) @→
-  (k) @↓
+  (j) @←   (i) @↑     (o) @→
+           (k) @↓
   (i j) home
   (i o) end
   (k j) pgup
   (k o) pgdn
 )
-(deflayermap arrows-right
+(deflayermap arrows
   y C-y
   u @bspc
   i (chord chord-arrows i)
@@ -120,10 +131,7 @@
   l @del
   k (chord chord-arrows k)
 
-  8 (fork C-z S-8 (sft))
-  9 (fork C-c S-9 (sft))
-  0 (fork C-v S-0 (sft))
-  - (fork C-x S-- (sft))
+  8 XX 9 XX 0 XX
   ralt nop1
   lalt nop1
   
@@ -135,8 +143,8 @@
   m    XX
 )
 
-(deflayermap mouse
-  j @🖱←   i @🖱↑  k @🖱↓   o @🖱→
+(deflayermap mouse ;; no arrow chords: mouse to enable natural diagonal movements
+  j @🖱←  i @🖱↑  k @🖱↓   o @🖱→
   n 🖰1    m 🖰2
   x C-x   z C-z  c C-c    v C-v    y C-y
   u XX
