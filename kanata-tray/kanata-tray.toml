@@ -11,8 +11,8 @@ defaults.tcp_port = 5829
 
 [defaults.layer_icons]
 mouse = 'kanata-icon-blue.png'
-arrows = 'kanata-icon-cyan.png'
-num = 'kanata-icon-orange.png'
+num = 'kanata-icon-cyan.png'
+nav = 'kanata-icon-orange.png'
 FKeys = 'kanata-icon-purple.png'
 sldr-on = 'kanata-icon-red.png'
 layout-IPA = 'kanata-icon-green.png'
