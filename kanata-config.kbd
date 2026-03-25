@@ -57,9 +57,6 @@
   tab     (tap-hold-press 200 200 tab @nav)
   [       (tap-hold-press 200 200 [   @nav)
   spc     (tap-hold 200 200 spc @nav)
-  3       (tap-hold-press 200 200 3   lalt)
-  4       (tap-hold-press 200 200 4   lctl)
-  8       (tap-hold-press 200 200 8   lctl)
   ,       (tap-hold-release-keys 200 200 ,   lctl (spc))
   .       (tap-hold-release-keys 200 200 .   lalt (spc))
   /       (tap-hold-release-keys 200 200 /   lsft (spc))
@@ -81,28 +78,31 @@
 )
 
 (deflayermap (mods-left)
-  tab (multi @mod lctl)     
-  q   (multi @mod lsft)      ;; only when working on bed
-  w   (multi @mod lalt)     
-  e   (multi @mod lctl)     
-  f   (multi @mod lsft)     
-  `   (multi @mod esc )    
-  r   (multi @mod tab )    
-  c   (multi @mod S-tab)
   ;; num and Fkeys on ring finger to enable ctl sft modifiers on those layers
-  a   @num
-  2   @fks
-  3   @med
-  d   XX
-  s   (multi @mod lmet)
-  z   XX
-  x   XX
-  v   XX
+  q   (tap-hold-press 100 100 C-q XX)
+  w   (tap-hold-press 100 100 C-w (multi @mod lalt @cycler))
+  e   (tap-hold-press 200 200 C-e (multi @mod lctl @cycler))
+  f   (tap-hold-press 200 200 C-f (multi @mod lsft))
+  g   (tap-hold-press 200 200 C-g (multi @mod lmet))
+  `   (multi @mod esc )
+  r   (tap-hold-press 200 200 C-r XX)
+  t   (tap-hold-press 200 200 C-t XX)
+  2   XX
+  a   (tap-hold-press 200 200 C-a @num)
+  3   @fks
+  4   @med
+  d   (tap-hold-press 200 200 C-d XX)
+  s   (tap-hold-press 200 200 C-s XX)
+  z   C-z
+  x   C-x
+  c   C-c
+  v   C-v
 )
 
 (defalias ralt-cycler (multi (release-key ralt) lalt (macro tab) (layer-while-held tab-cycler)))
 (defalias rctl-cycler (multi lctl (macro tab) (layer-while-held tab-cycler)))
-(deflayermap tab-cycler [ tab ' S-tab 0 esc - esc = esc ] tab ret S-tab j @← i @↑ k @↓ o @→)
+(defalias cycler (layer-while-held tab-cycler))
+(deflayermap tab-cycler tab tab [ tab ' S-tab 0 esc - esc = esc ] tab ret S-tab j @← i @↑ k @↓ o @→)
 
 (defalias
   mod (layer-while-held mods-left)
@@ -115,10 +115,10 @@
 
 (include "configs/mouse.kbd")
 (defchords chord-arrows $chord-timeout
-  (j) @←   (i) @↑     (o) @→
+  (j) @←   (i) @↑ (o) @→
            (k) @↓
-  (i j) home
-  (i o) end
+  (i j) @C←
+  (i o) @C→
   (k j) pgup
   (k o) pgdn
 )
@@ -161,8 +161,10 @@
 ;; Repeated arrow means ctrl+arrow (word jump). Only defined for left and right.
 (defalias ↑    (fork up   @☸↑ (nop1)))
 (defalias ↓    (fork down @☸↓ (nop1)))
-(defalias ←    (fork left    (tap-hold 200 500 C-left  (macro (unmod (lctl rctl) home))) (lctl rctl)))
-(defalias →    (fork right   (tap-hold 200 500 C-right (macro (unmod (lctl rctl) end))) (lctl rctl)))
+(defalias C←   (tap-hold 200 600 C-left  home))
+(defalias C→   (tap-hold 200 600 C-right end))
+(defalias ←    left)
+(defalias →    right)
 
 (defalias Xbspc (macro (unmod lsft home) (unmod bspc)))
 (defalias Xdel  (macro (unmod lsft end) (unmod del)))
