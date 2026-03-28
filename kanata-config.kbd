@@ -66,10 +66,11 @@
   ;;    Bottom
 
   ;;    Far top
-  F1      (tap-hold 200 600 F1  (layer-switch base))
-  F2      (tap-hold 200 600 F2  (layer-switch layout-IPA))
-  F3      (tap-hold 200 600 F3  (layer-switch layout-cyrillic))
-  F4      (tap-hold 200 600 F4  (layer-switch layout-my-colemak))
+  esc     (tap-hold 200 600 esc  (layer-switch base))
+  F1      (tap-hold 200 600 A-F1 (macro F1))
+  F2      (tap-hold 200 600 F2   (layer-switch layout-IPA))
+  F3      (tap-hold 200 600 F3   (layer-switch layout-cyrillic))
+  F4      (tap-hold 200 600 F4   (layer-switch layout-my-colemak))
 
   F12     (tap-hold 200 600 F12 lrld)
 

@@ -19,7 +19,7 @@ layout-IPA = 'kanata-icon-green.png'
 layout-my-colemak = 'kanata-icon-purple.png'
 
 [presets.'Default Preset']
-kanata_executable = '/home/carlos/keyboard/exec/kanata_linux_x64'
-kanata_config = '/home/carlos/keyboard/kanata-config.kbd'
+kanata_executable = '/home/carlos/system/keyboard/exec/kanata_linux_x64'
+kanata_config = '/home/carlos/system/keyboard/kanata-config.kbd'
 autorun = true
 

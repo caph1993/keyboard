@@ -2,8 +2,8 @@
 Version=1.0
 Name=Kanata Tray
 Comment=Launch Kanata Tray
-Exec=/home/carlos/keyboard/kanata-tray/kanata-tray-linux
-Icon=/home/carlos/keyboard/kanata-tray/icons/kanata-icon.svg
+Exec=/home/carlos/system/keyboard/kanata-tray/kanata-tray-linux
+Icon=/home/carlos/system/keyboard/kanata-tray/icons/kanata-icon.svg
 Terminal=false
 Type=Application
 Categories=Utility;System;
